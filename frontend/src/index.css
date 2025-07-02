@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Font Definitions */
+@layer base {
+  /* Shapiro 96 Inclined Wide - For Titles (fallback to Inter Black) */
+  .font-title {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 0.02em;
+    transform: skew(-5deg);
+  }
+  
+  /* Kairos Sans Condensed Bold Italic - For Headers/Subheaders/Buttons (fallback to Inter Bold) */
+  .font-header {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 700;
+    font-style: italic;
+    font-stretch: condensed;
+    letter-spacing: -0.01em;
+  }
+  
+  /* Neusa Next Pro Condensed Reg - For body text (fallback to Inter Regular) */
+  .font-body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-weight: 400;
+    font-stretch: condensed;
+    letter-spacing: 0.005em;
+  }
+}
