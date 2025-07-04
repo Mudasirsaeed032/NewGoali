@@ -1,99 +1,172 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Trophy, ArrowLeft, User, Mail, Building, MessageSquare, CheckCircle, ArrowRight, Users, Target, Calendar, DollarSign, Shield, AlertCircle, Key, Send } from 'lucide-react';
+"use client"
+
+import React, { useState } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useNavigate, useSearchParams } from "react-router-dom"
+import {
+  Trophy,
+  ArrowLeft,
+  User,
+  Mail,
+  Building,
+  MessageSquare,
+  CheckCircle,
+  ArrowRight,
+  Users,
+  Target,
+  Calendar,
+  DollarSign,
+  Shield,
+  AlertCircle,
+  Key,
+} from "lucide-react"
+import { supabase } from "../../lib/supabaseClient"
 
 const SignUpPage = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const inviteToken = searchParams.get('invite');
-  const inviteRole = searchParams.get('role');
-  
-  const [signUpType, setSignUpType] = useState<'organization' | 'invited' | null>(
-    inviteToken ? 'invited' : null
-  );
-  
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const inviteToken = searchParams.get("invite")
+  const inviteRole = searchParams.get("role")
+
+  const [signUpType, setSignUpType] = useState<"organization" | "invited" | null>(inviteToken ? "invited" : null)
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    organization: '',
-    description: '',
-    phone: '',
-    playerName: '', // For parent signup
-    position: '', // For player signup
-    teamCode: '' // For joining existing team
-  });
-  
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [inviteData, setInviteData] = useState<any>(null);
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    organization: "",
+    description: "",
+    phone: "",
+    playerName: "", // For parent signup
+    position: "", // For player signup
+    teamCode: "", // For joining existing team
+  })
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSubmitted, setIsSubmitted] = useState(false)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [inviteData, setInviteData] = useState<any>(null)
+  const [error, setError] = useState<string | null>(null)
 
   // Simulate invite validation
   React.useEffect(() => {
     if (inviteToken && inviteRole) {
       // In real app, validate invite token with backend
       setInviteData({
-        organizationName: 'Thunder Soccer Club',
-        inviterName: 'Coach Martinez',
+        organizationName: "Thunder Soccer Club",
+        inviterName: "Coach Martinez",
         role: inviteRole,
-        valid: true
-      });
+        valid: true,
+      })
     }
-  }, [inviteToken, inviteRole]);
+  }, [inviteToken, inviteRole])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
+    const { name, value } = e.target
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }));
-  };
+      [name]: value,
+    }))
+    // Clear error when user starts typing
+    if (error) setError(null)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
-    
-    // Auto-redirect after success
-    setTimeout(() => {
-      navigate('/login');
-    }, 3000);
-  };
+    e.preventDefault()
+    setIsSubmitting(true)
+    setError(null)
+
+    try {
+      // Step 1: Register with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      })
+
+      if (authError) {
+        setError(authError.message)
+        setIsSubmitting(false)
+        return
+      }
+
+      // Step 2: Send user data to backend for role assignment and database insertion
+      const userData = {
+        email: formData.email,
+        full_name: formData.name,
+        role: signUpType === "organization" ? "admin" : inviteRole || "athlete",
+        organization: formData.organization,
+        description: formData.description,
+        phone: formData.phone,
+        player_name: formData.playerName,
+        position: formData.position,
+        team_code: formData.teamCode,
+        invite_token: inviteToken,
+        signup_type: signUpType,
+      }
+
+      const response = await fetch("/api/auth/register-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || "Registration failed")
+      }
+
+      if (result.token) {
+        // Step 3: Store JWT token in localStorage
+        localStorage.setItem("sb-access-token", result.token)
+        setIsSubmitting(false)
+        setIsSubmitted(true)
+
+        // Auto-redirect after success
+        setTimeout(() => {
+          navigate("/login")
+        }, 3000)
+      } else {
+        throw new Error("No token received from server")
+      }
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred")
+      setIsSubmitting(false)
+    }
+  }
 
   const nextStep = () => {
     if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   const isStep1Valid = () => {
-    if (signUpType === 'organization') {
-      return formData.name && formData.email && formData.organization;
-    } else if (signUpType === 'invited') {
-      return formData.name && formData.email;
+    if (signUpType === "organization") {
+      return formData.name && formData.email && formData.organization
+    } else if (signUpType === "invited") {
+      return formData.name && formData.email
     }
-    return false;
-  };
+    return false
+  }
 
   const isStep2Valid = () => {
-    return formData.password && formData.confirmPassword && formData.password === formData.confirmPassword;
-  };
+    return (
+      formData.password &&
+      formData.confirmPassword &&
+      formData.password === formData.confirmPassword &&
+      formData.password.length >= 6
+    )
+  }
 
-  const isFormValid = isStep1Valid() && isStep2Valid();
+  const isFormValid = isStep1Valid() && isStep2Valid()
 
   if (isSubmitted) {
     return (
@@ -111,28 +184,24 @@ const SignUpPage = () => {
           >
             <CheckCircle className="h-10 w-10 text-white" />
           </motion.div>
-          
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
             className="text-3xl font-title text-gray-900 mb-4"
           >
-            {signUpType === 'organization' ? 'Organization Created!' : 'Account Created!'}
+            {signUpType === "organization" ? "Organization Created!" : "Account Created!"}
           </motion.h2>
-          
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             className="text-gray-600 font-body mb-6"
           >
-            {signUpType === 'organization' 
-              ? 'Your organization has been set up! You can now invite team members and start fundraising.'
-              : 'Welcome to the team! You can now access your dashboard and start participating.'
-            }
+            {signUpType === "organization"
+              ? "Your organization has been set up! You can now invite team members and start fundraising."
+              : "Welcome to the team! You can now access your dashboard and start participating."}
           </motion.p>
-          
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -143,7 +212,7 @@ const SignUpPage = () => {
           </motion.div>
         </motion.div>
       </div>
-    );
+    )
   }
 
   // Initial sign-up type selection
@@ -151,27 +220,30 @@ const SignUpPage = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative overflow-hidden">
         {/* Background elements */}
-        <motion.div 
+        <motion.div
           className="absolute inset-0 opacity-[0.02]"
           animate={{
             backgroundPosition: [`0px 0px`, `100px 100px`],
           }}
           transition={{
             duration: 20,
-            repeat: Infinity,
+            repeat: Number.POSITIVE_INFINITY,
             repeatType: "reverse",
-            ease: "linear"
+            ease: "linear",
           }}
         >
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0,0,0) 1px, transparent 0)`,
-            backgroundSize: '24px 24px',
-          }} />
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0,0,0) 1px, transparent 0)`,
+              backgroundSize: "24px 24px",
+            }}
+          />
         </motion.div>
 
         {/* Back Button */}
         <motion.button
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           className="absolute top-6 left-6 z-50 flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors group"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -184,11 +256,7 @@ const SignUpPage = () => {
 
         <div className="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl w-full text-center">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
               <div className="flex items-center justify-center space-x-3 mb-8">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
                   <Trophy className="h-7 w-7 text-white" />
@@ -203,7 +271,6 @@ const SignUpPage = () => {
                   get started?
                 </span>
               </h1>
-
               <p className="text-xl text-gray-600 font-body mb-12 max-w-2xl mx-auto">
                 Choose the option that best describes your situation
               </p>
@@ -216,14 +283,15 @@ const SignUpPage = () => {
                   transition={{ delay: 0.2 }}
                   whileHover={{ scale: 1.02 }}
                   className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 cursor-pointer"
-                  onClick={() => setSignUpType('organization')}
+                  onClick={() => setSignUpType("organization")}
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-6">
                     <Building className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-header text-gray-900 mb-4">Start a New Organization</h3>
                   <p className="text-gray-600 font-body mb-6">
-                    Set up a new team, club, or organization. You'll become the admin and can invite coaches, players, and parents.
+                    Set up a new team, club, or organization. You'll become the admin and can invite coaches, players,
+                    and parents.
                   </p>
                   <div className="space-y-2 text-sm text-gray-500 font-body">
                     <div className="flex items-center space-x-2">
@@ -248,14 +316,15 @@ const SignUpPage = () => {
                   transition={{ delay: 0.4 }}
                   whileHover={{ scale: 1.02 }}
                   className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 cursor-pointer"
-                  onClick={() => setSignUpType('invited')}
+                  onClick={() => setSignUpType("invited")}
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-6">
                     <Users className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="text-2xl font-header text-gray-900 mb-4">Join Existing Team</h3>
                   <p className="text-gray-600 font-body mb-6">
-                    Join a team that's already using Goali. You'll need an invitation or team code from your admin or coach.
+                    Join a team that's already using Goali. You'll need an invitation or team code from your admin or
+                    coach.
                   </p>
                   <div className="space-y-2 text-sm text-gray-500 font-body">
                     <div className="flex items-center space-x-2">
@@ -281,9 +350,9 @@ const SignUpPage = () => {
                 className="mt-8 text-center"
               >
                 <p className="text-gray-600 font-body text-sm">
-                  Already have an account?{' '}
+                  Already have an account?{" "}
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate("/login")}
                     className="text-blue-600 hover:text-blue-700 transition-colors font-header"
                   >
                     Sign in here
@@ -294,33 +363,36 @@ const SignUpPage = () => {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30 relative overflow-hidden">
       {/* Background elements */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0 opacity-[0.02]"
         animate={{
           backgroundPosition: [`0px 0px`, `100px 100px`],
         }}
         transition={{
           duration: 20,
-          repeat: Infinity,
+          repeat: Number.POSITIVE_INFINITY,
           repeatType: "reverse",
-          ease: "linear"
+          ease: "linear",
         }}
       >
-        <div className="absolute inset-0" style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0,0,0) 1px, transparent 0)`,
-          backgroundSize: '24px 24px',
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 1px 1px, rgb(0,0,0) 1px, transparent 0)`,
+            backgroundSize: "24px 24px",
+          }}
+        />
       </motion.div>
 
       {/* Back Button */}
       <motion.button
-        onClick={() => signUpType ? setSignUpType(null) : navigate('/')}
+        onClick={() => (signUpType ? setSignUpType(null) : navigate("/"))}
         className="absolute top-6 left-6 z-50 flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors group"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -334,7 +406,6 @@ const SignUpPage = () => {
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            
             {/* Left Side - Information */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
@@ -349,7 +420,7 @@ const SignUpPage = () => {
                 <span className="text-3xl font-title text-gray-900">Goali</span>
               </div>
 
-              {signUpType === 'organization' ? (
+              {signUpType === "organization" ? (
                 <div>
                   <h1 className="text-4xl lg:text-5xl font-title text-gray-900 mb-4 leading-tight">
                     Create Your
@@ -371,7 +442,7 @@ const SignUpPage = () => {
                         <h3 className="font-header text-blue-900">You're Invited!</h3>
                       </div>
                       <p className="text-blue-800 font-body">
-                        <strong>{inviteData.inviterName}</strong> has invited you to join{' '}
+                        <strong>{inviteData.inviterName}</strong> has invited you to join{" "}
                         <strong>{inviteData.organizationName}</strong> as a <strong>{inviteData.role}</strong>.
                       </p>
                     </div>
@@ -386,7 +457,6 @@ const SignUpPage = () => {
                       </p>
                     </div>
                   )}
-                  
                   <h1 className="text-4xl lg:text-5xl font-title text-gray-900 mb-4 leading-tight">
                     Join Your
                     <br />
@@ -407,17 +477,40 @@ const SignUpPage = () => {
                 transition={{ duration: 0.6, delay: 0.8 }}
                 className="space-y-4"
               >
-                {(signUpType === 'organization' ? [
-                  { icon: Users, title: 'Invite Team Members', description: 'Send secure invitations to coaches, players, and parents' },
-                  { icon: Target, title: 'Set Fundraising Goals', description: 'Create and track multiple fundraising campaigns' },
-                  { icon: Calendar, title: 'Manage Events', description: 'Organize fundraising events and activities' },
-                  { icon: DollarSign, title: 'Track All Donations', description: 'Monitor progress with real-time analytics' }
-                ] : [
-                  { icon: Target, title: 'Personal Goals', description: 'Set and track your individual fundraising targets' },
-                  { icon: Users, title: 'Team Collaboration', description: 'Work together with your teammates' },
-                  { icon: Calendar, title: 'Event Participation', description: 'Join team events and activities' },
-                  { icon: DollarSign, title: 'Secure Payments', description: 'Safe and easy donation processing' }
-                ]).map((benefit, index) => (
+                {(signUpType === "organization"
+                  ? [
+                      {
+                        icon: Users,
+                        title: "Invite Team Members",
+                        description: "Send secure invitations to coaches, players, and parents",
+                      },
+                      {
+                        icon: Target,
+                        title: "Set Fundraising Goals",
+                        description: "Create and track multiple fundraising campaigns",
+                      },
+                      {
+                        icon: Calendar,
+                        title: "Manage Events",
+                        description: "Organize fundraising events and activities",
+                      },
+                      {
+                        icon: DollarSign,
+                        title: "Track All Donations",
+                        description: "Monitor progress with real-time analytics",
+                      },
+                    ]
+                  : [
+                      {
+                        icon: Target,
+                        title: "Personal Goals",
+                        description: "Set and track your individual fundraising targets",
+                      },
+                      { icon: Users, title: "Team Collaboration", description: "Work together with your teammates" },
+                      { icon: Calendar, title: "Event Participation", description: "Join team events and activities" },
+                      { icon: DollarSign, title: "Secure Payments", description: "Safe and easy donation processing" },
+                    ]
+                ).map((benefit, index) => (
                   <motion.div
                     key={benefit.title}
                     initial={{ opacity: 0, x: -20 }}
@@ -449,23 +542,39 @@ const SignUpPage = () => {
                 <div className="flex items-center space-x-4">
                   {[1, 2, 3].map((step) => (
                     <div key={step} className="flex items-center">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-header transition-all duration-300 ${
-                        currentStep >= step 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-200 text-gray-600'
-                      }`}>
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-header transition-all duration-300 ${
+                          currentStep >= step ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
                         {step}
                       </div>
                       {step < 3 && (
-                        <div className={`w-12 h-1 mx-2 rounded-full transition-all duration-300 ${
-                          currentStep > step ? 'bg-blue-600' : 'bg-gray-200'
-                        }`} />
+                        <div
+                          className={`w-12 h-1 mx-2 rounded-full transition-all duration-300 ${
+                            currentStep > step ? "bg-blue-600" : "bg-gray-200"
+                          }`}
+                        />
                       )}
                     </div>
                   ))}
                 </div>
                 <span className="text-sm text-gray-500 font-body">Step {currentStep} of 3</span>
               </div>
+
+              {/* Error Display */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl"
+                >
+                  <div className="flex items-center space-x-2">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <p className="text-red-800 font-body text-sm">{error}</p>
+                  </div>
+                </motion.div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <AnimatePresence mode="wait">
@@ -480,13 +589,12 @@ const SignUpPage = () => {
                     >
                       <div>
                         <h2 className="text-2xl font-title text-gray-900 mb-2">
-                          {signUpType === 'organization' ? 'Organization Details' : 'Personal Information'}
+                          {signUpType === "organization" ? "Organization Details" : "Personal Information"}
                         </h2>
                         <p className="text-gray-600 font-body">
-                          {signUpType === 'organization' 
-                            ? 'Tell us about your organization' 
-                            : 'Let us know who you are'
-                          }
+                          {signUpType === "organization"
+                            ? "Tell us about your organization"
+                            : "Let us know who you are"}
                         </p>
                       </div>
 
@@ -528,7 +636,7 @@ const SignUpPage = () => {
                         </div>
                       </div>
 
-                      {signUpType === 'organization' && (
+                      {signUpType === "organization" && (
                         <div>
                           <label htmlFor="organization" className="block text-sm font-header text-gray-700 mb-2">
                             Organization Name *
@@ -549,7 +657,7 @@ const SignUpPage = () => {
                         </div>
                       )}
 
-                      {signUpType === 'invited' && !inviteData && (
+                      {signUpType === "invited" && !inviteData && (
                         <div>
                           <label htmlFor="teamCode" className="block text-sm font-header text-gray-700 mb-2">
                             Team Code or Invitation Link
@@ -608,8 +716,9 @@ const SignUpPage = () => {
                           value={formData.password}
                           onChange={handleInputChange}
                           className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 font-body"
-                          placeholder="Create a strong password"
+                          placeholder="Create a strong password (min. 6 characters)"
                           required
+                          minLength={6}
                         />
                       </div>
 
@@ -642,7 +751,6 @@ const SignUpPage = () => {
                         >
                           Back
                         </motion.button>
-
                         <motion.button
                           type="button"
                           onClick={nextStep}
@@ -670,14 +778,13 @@ const SignUpPage = () => {
                       <div>
                         <h2 className="text-2xl font-title text-gray-900 mb-2">Final Details</h2>
                         <p className="text-gray-600 font-body">
-                          {signUpType === 'organization' 
-                            ? 'Tell us about your fundraising goals' 
-                            : 'Complete your profile'
-                          }
+                          {signUpType === "organization"
+                            ? "Tell us about your fundraising goals"
+                            : "Complete your profile"}
                         </p>
                       </div>
 
-                      {signUpType === 'organization' ? (
+                      {signUpType === "organization" ? (
                         <div>
                           <label htmlFor="description" className="block text-sm font-header text-gray-700 mb-2">
                             Describe your fundraising needs *
@@ -712,8 +819,7 @@ const SignUpPage = () => {
                               placeholder="Your phone number"
                             />
                           </div>
-
-                          {inviteRole === 'parent' && (
+                          {inviteRole === "parent" && (
                             <div>
                               <label htmlFor="playerName" className="block text-sm font-header text-gray-700 mb-2">
                                 Player Name
@@ -729,8 +835,7 @@ const SignUpPage = () => {
                               />
                             </div>
                           )}
-
-                          {inviteRole === 'player' && (
+                          {inviteRole === "player" && (
                             <div>
                               <label htmlFor="position" className="block text-sm font-header text-gray-700 mb-2">
                                 Position
@@ -759,7 +864,6 @@ const SignUpPage = () => {
                         >
                           Back
                         </motion.button>
-
                         <motion.button
                           type="submit"
                           disabled={!isFormValid || isSubmitting}
@@ -772,15 +876,13 @@ const SignUpPage = () => {
                               <motion.div
                                 className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
                                 animate={{ rotate: 360 }}
-                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                               />
                               <span>Creating Account...</span>
                             </>
                           ) : (
                             <>
-                              <span>
-                                {signUpType === 'organization' ? 'Create Organization' : 'Join Team'}
-                              </span>
+                              <span>{signUpType === "organization" ? "Create Organization" : "Join Team"}</span>
                               <CheckCircle className="h-5 w-5" />
                             </>
                           )}
@@ -791,16 +893,16 @@ const SignUpPage = () => {
                 </AnimatePresence>
               </form>
 
-              <motion.div 
+              <motion.div
                 className="mt-6 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.8 }}
               >
                 <p className="text-gray-600 font-body text-sm">
-                  Already have an account?{' '}
+                  Already have an account?{" "}
                   <button
-                    onClick={() => navigate('/login')}
+                    onClick={() => navigate("/login")}
                     className="text-blue-600 hover:text-blue-700 transition-colors font-header"
                   >
                     Sign in here
@@ -812,7 +914,7 @@ const SignUpPage = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default SignUpPage;
+export default SignUpPage
