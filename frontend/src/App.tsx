@@ -3,11 +3,12 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform, useInView, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Trophy, Users, Target, TrendingUp, Shield, Heart, Star, ArrowRight, Award, DollarSign, BarChart3, CreditCard, Calendar, Bell, User, Settings } from 'lucide-react';
 import LoginPage from './components/Auth/LoginPage';
-import SignUpPage from './components/Auth/SignUpPage';
 import Dashboard from './components/Dashboard';
 import ResourcesPage from './components/ResourcesPage';
 import { EventsProvider } from './components/EventsContext';
 import { DonationPagesProvider } from './components/DonationPagesContext';
+import SignUpPage1 from './components/Auth/SignUpPage1.jsx';
+import SignUpPage from './components/Auth/SignUpPage';
 
 function LandingPage() {
   const navigate = useNavigate();
@@ -897,7 +898,8 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup" element={<SignUpPage1 />} />
+          <Route path="/signup1" element={<SignUpPage />} />
           <Route path="/dashboard/:role" element={<Dashboard />} />
           <Route path="/resources" element={<ResourcesPage />} />
         </Routes>
