@@ -13,24 +13,38 @@ const generateToken = (user) => {
 
 // Register User Controller (after Supabase signup)
 const registerUser = async (req, res) => {
-  const { email, full_name, role } = req.body;
+  const { email, full_name, role, invite_token, signup_type, organization, description, phone, player_name, position, team_code } = req.body;
 
   try {
+    console.log('Received data:', req.body); // Log the received data
+
+    // Check if all required fields are provided
+    if (!email || !full_name || !role) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
     // Insert into Supabase 'users' table
     const { data, error } = await supabase
       .from('users')
-      .upsert([{ email, full_name, role }], { onConflict: ['email'] });
+      .upsert([{ email, full_name, role, organization, description, phone, player_name, position, team_code }], { onConflict: ['email'] });
 
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error('Supabase error:', error.message); // Log the Supabase error
+      return res.status(500).json({ error: 'Failed to insert user into database' });
+    }
+
+    console.log('User registered successfully:', data); // Log the successful user insertion
 
     // Generate JWT token
     const token = generateToken(data[0]);
 
     res.status(200).json({ message: 'User registered successfully', token });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error during registration:', error.message); // Log unexpected errors
+    res.status(500).json({ error: 'Unexpected error during registration' });
   }
 };
+
 
 // Login User Controller (return token)
 const loginUser = async (req, res) => {

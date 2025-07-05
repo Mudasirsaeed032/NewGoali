@@ -105,17 +105,22 @@ const SignUpPage = () => {
         signup_type: signUpType,
       }
 
-      const response = await fetch("/api/auth/register-user", {
+      const response = await fetch("http://localhost:5000/api/auth/register-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
       })
 
-      const result = await response.json()
-
+      // Check if response is OK
       if (!response.ok) {
-        throw new Error(result.error || "Registration failed")
+        const result = await response.text() // Read the response as text first
+        console.error("Error from backend:", result)
+        throw new Error(result || "Registration failed")
       }
+
+      // Parse the response body as JSON
+      const result = await response.json()
+      console.log(result)
 
       if (result.token) {
         // Step 3: Store JWT token in localStorage
@@ -131,6 +136,7 @@ const SignUpPage = () => {
         throw new Error("No token received from server")
       }
     } catch (err: any) {
+      console.error("Error during sign-up:", err)
       setError(err.message || "An unexpected error occurred")
       setIsSubmitting(false)
     }
@@ -479,37 +485,37 @@ const SignUpPage = () => {
               >
                 {(signUpType === "organization"
                   ? [
-                      {
-                        icon: Users,
-                        title: "Invite Team Members",
-                        description: "Send secure invitations to coaches, players, and parents",
-                      },
-                      {
-                        icon: Target,
-                        title: "Set Fundraising Goals",
-                        description: "Create and track multiple fundraising campaigns",
-                      },
-                      {
-                        icon: Calendar,
-                        title: "Manage Events",
-                        description: "Organize fundraising events and activities",
-                      },
-                      {
-                        icon: DollarSign,
-                        title: "Track All Donations",
-                        description: "Monitor progress with real-time analytics",
-                      },
-                    ]
+                    {
+                      icon: Users,
+                      title: "Invite Team Members",
+                      description: "Send secure invitations to coaches, players, and parents",
+                    },
+                    {
+                      icon: Target,
+                      title: "Set Fundraising Goals",
+                      description: "Create and track multiple fundraising campaigns",
+                    },
+                    {
+                      icon: Calendar,
+                      title: "Manage Events",
+                      description: "Organize fundraising events and activities",
+                    },
+                    {
+                      icon: DollarSign,
+                      title: "Track All Donations",
+                      description: "Monitor progress with real-time analytics",
+                    },
+                  ]
                   : [
-                      {
-                        icon: Target,
-                        title: "Personal Goals",
-                        description: "Set and track your individual fundraising targets",
-                      },
-                      { icon: Users, title: "Team Collaboration", description: "Work together with your teammates" },
-                      { icon: Calendar, title: "Event Participation", description: "Join team events and activities" },
-                      { icon: DollarSign, title: "Secure Payments", description: "Safe and easy donation processing" },
-                    ]
+                    {
+                      icon: Target,
+                      title: "Personal Goals",
+                      description: "Set and track your individual fundraising targets",
+                    },
+                    { icon: Users, title: "Team Collaboration", description: "Work together with your teammates" },
+                    { icon: Calendar, title: "Event Participation", description: "Join team events and activities" },
+                    { icon: DollarSign, title: "Secure Payments", description: "Safe and easy donation processing" },
+                  ]
                 ).map((benefit, index) => (
                   <motion.div
                     key={benefit.title}
@@ -543,17 +549,15 @@ const SignUpPage = () => {
                   {[1, 2, 3].map((step) => (
                     <div key={step} className="flex items-center">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-header transition-all duration-300 ${
-                          currentStep >= step ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
-                        }`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-header transition-all duration-300 ${currentStep >= step ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
+                          }`}
                       >
                         {step}
                       </div>
                       {step < 3 && (
                         <div
-                          className={`w-12 h-1 mx-2 rounded-full transition-all duration-300 ${
-                            currentStep > step ? "bg-blue-600" : "bg-gray-200"
-                          }`}
+                          className={`w-12 h-1 mx-2 rounded-full transition-all duration-300 ${currentStep > step ? "bg-blue-600" : "bg-gray-200"
+                            }`}
                         />
                       )}
                     </div>
