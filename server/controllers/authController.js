@@ -13,7 +13,8 @@ exports.handleSignup = async (req, res) => {
     const { data: userData, error: signupError } = await supabase.auth.admin.createUser({
       email,
       password,
-      user_metadata: { full_name }
+      user_metadata: { full_name },
+      email_confirm: true
     })
 
     if (signupError) throw signupError

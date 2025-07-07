@@ -47,7 +47,7 @@ const SignupOrganization = () => {
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-black shadow-lg rounded-xl">
+    <div className="max-w-xl mx-auto mt-10 p-6 bg-grey shadow-lg rounded-xl">
       <h2 className="text-2xl font-bold mb-4">Start a New Organization</h2>
       {error && <p className="text-red-500">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">

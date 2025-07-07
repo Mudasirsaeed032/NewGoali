@@ -36,7 +36,7 @@ const Login = () => {
         .select('id, role')
         .eq('id', userId)
         .single()
-
+    console.log(userData);
       if (userError) throw new Error('User not found in database.')
 
       // 3. Redirect to role dashboard
@@ -50,7 +50,7 @@ const Login = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-6 bg-white shadow-lg rounded-xl">
+    <div className="max-w-md mx-auto mt-12 p-6 bg-grey shadow-lg rounded-xl">
       <h2 className="text-2xl font-bold mb-4">Log In</h2>
       {error && <p className="text-red-600">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
