@@ -1,9 +1,10 @@
 // server/routes/auth.js
 const express = require('express')
-const { handleSignup } = require('../controllers/authController')
+const { handleSignup, joinTeamSignup } = require('../controllers/authController')
 
 const router = express.Router()
 
-router.post('/signup', handleSignup)
+router.post('/signup', handleSignup);
+router.post('/join-team', joinTeamSignup);
 
 module.exports = router
