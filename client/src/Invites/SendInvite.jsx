@@ -1,16 +1,42 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { supabase } from '../supabaseClient'
 
 const SendInvite = () => {
-  const [form, setForm] = useState({
-    email: '',
-    role: 'athlete',
-  })
+  const [form, setForm] = useState({ email: '', role: 'athlete' })
   const [loading, setLoading] = useState(false)
   const [inviteLink, setInviteLink] = useState('')
   const [error, setError] = useState(null)
+  const [userId, setUserId] = useState(null)
+  const [teamId, setTeamId] = useState(null)
 
-  const currentUserId = 'admin-user-id-here' // 🔁 Replace with dynamic user ID
-  const currentTeamId = 'admin-team-id-here' // 🔁 Replace with current admin's team
+  // Fetch current user + team
+  useEffect(() => {
+    const getUserInfo = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        setError('You must be logged in')
+        return
+      }
+
+      setUserId(user.id)
+
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('team_id')
+        .eq('id', user.id)
+        .single()
+
+      if (userError) {
+        setError('Failed to fetch user data')
+        return
+      }
+
+      setTeamId(userData.team_id)
+    }
+
+    getUserInfo()
+  }, [])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -18,9 +44,15 @@ const SendInvite = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
     setInviteLink('')
+    setLoading(true)
+
+    if (!userId || !teamId) {
+      setError('User or team ID not loaded yet.')
+      setLoading(false)
+      return
+    }
 
     try {
       const res = await fetch('http://localhost:5000/api/invite/send', {
@@ -28,14 +60,16 @@ const SendInvite = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...form,
-          team_id: currentTeamId,
-          sent_by: currentUserId
+          team_id: teamId,
+          sent_by: userId
         })
       })
 
       const data = await res.json()
 
-      if (!res.ok) throw new Error(data.error || 'Invite failed')
+      if (!res.ok) {
+        throw new Error(data.error || 'Invite failed')
+      }
 
       setInviteLink(data.inviteLink)
 
@@ -47,7 +81,7 @@ const SendInvite = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-6 bg-white shadow-lg rounded-xl">
+    <div className="max-w-md mx-auto mt-12 p-6 bg-grey shadow-lg rounded-xl">
       <h2 className="text-xl font-bold mb-4">Send Team Invite</h2>
 
       {error && <p className="text-red-600">{error}</p>}
@@ -86,7 +120,7 @@ const SendInvite = () => {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !teamId}
           className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
         >
           {loading ? 'Sending...' : 'Send Invite'}
