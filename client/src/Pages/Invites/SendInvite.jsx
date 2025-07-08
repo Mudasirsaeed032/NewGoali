@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { supabase } from '../supabaseClient'
+import { supabase } from '../../supabaseClient'
 
 const SendInvite = () => {
   const [form, setForm] = useState({ email: '', role: 'athlete' })

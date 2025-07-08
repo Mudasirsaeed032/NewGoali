@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
-import SignupOrganization from './Authentication/SignupOrganization'
-import Login from './Authentication/Login'
-import JoinTeam from './Authentication/JoinTeam'
-import SendInvite from './Invites/SendInvite'
-import DashboardRedirect from './DashboardRedict'
+import SignupOrganization from './Pages/Authentication/SignupOrganization'
+import Login from './Pages/Authentication/Login'
+import JoinTeam from './Pages/Authentication/JoinTeam'
+import SendInvite from './Pages/Invites/SendInvite'
+import DashboardRedirect from './Pages/DashboardRedirect/DashboardRedirect'
 
 
 function App() {
