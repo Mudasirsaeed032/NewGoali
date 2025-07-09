@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import AdminDashboard from '../dashboard/AdminDashboard'
+import AdminDashboard from '../dashboard/Admin/AdminDashboard'
 import CoachDashboard from '../dashboard/CoachDashboard'
 import ParentDashboard from '../dashboard/ParentDashboard'
 import AthleteDashboard from '../dashboard/AthleteDashboard'
