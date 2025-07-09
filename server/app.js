@@ -10,6 +10,7 @@ const inviteRoutes = require('./routes/invite');
 const adminRoutes = require('./routes/admin');
 const eventRoutes = require('./routes/events');
 const fundraiserRoutes = require('./routes/fundraisers');
+const paymentRoutes = require('./routes/payments');
 
 const app = express()
 
