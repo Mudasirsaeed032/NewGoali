@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../supabaseClient.js'
 import KPIBox from './KPIBox'
+import UserTable from './UserTable.jsx'
 
 const AdminDashboard = () => {
-  const [metrics, setMetrics] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const fetchMetrics = async () => {
@@ -19,6 +21,27 @@ const AdminDashboard = () => {
     }
 
     fetchMetrics()
+  }, [])
+
+  useEffect(() => {
+    const fetchMetricsAndUsers = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const [metricsRes, usersRes] = await Promise.all([
+        fetch(`http://localhost:5000/api/admin/metrics?user_id=${user.id}`),
+        fetch(`http://localhost:5000/api/admin/users?user_id=${user.id}`)
+      ])
+
+      const metricsData = await metricsRes.json()
+      const usersData = await usersRes.json()
+
+      setMetrics(metricsData)
+      setUsers(usersData.users)
+      setLoading(false)
+    }
+
+    fetchMetricsAndUsers()
   }, [])
 
   if (loading) {
@@ -36,6 +59,7 @@ const AdminDashboard = () => {
         <KPIBox title="Team Members" value={metrics.teamMembers} />
         <KPIBox title="Collection Rate" value={`${metrics.collectionRate}%`} />
       </div>
+      <UserTable className='bg-grey txt-black' users={users}/>
 
       {/* Future: invites, members, activity feed */}
     </div>
