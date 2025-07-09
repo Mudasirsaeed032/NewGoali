@@ -9,6 +9,8 @@ import SendInvite from './Pages/Invites/SendInvite'
 import DashboardRedirect from './Pages/DashboardRedirect/DashboardRedirect'
 import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute'
 import Layout from './Boilerplate/Layout'
+import CreateEvent from './Pages/Events/CreateEvent'
+
 
 function App() {
   const [count, setCount] = useState(0)
@@ -26,7 +28,7 @@ function App() {
             path="/admin/send-invite"
             element={
               <ProtectedRoute requiredRole="admin">
-                  <SendInvite />
+                <SendInvite />
               </ProtectedRoute>
             }
           />
@@ -41,6 +43,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/events/create"
+            element={
+              <ProtectedRoute>
+                  <CreateEvent />
+              </ProtectedRoute>
+            }
+          />
+
         </Routes>
       </Layout>
     </Router>
