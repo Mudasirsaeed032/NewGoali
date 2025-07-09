@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../supabaseClient'
+import { useNavigate } from 'react-router-dom';
 
 const SendInvite = () => {
   const [form, setForm] = useState({ email: '', role: 'athlete' })
@@ -8,6 +9,8 @@ const SendInvite = () => {
   const [error, setError] = useState(null)
   const [userId, setUserId] = useState(null)
   const [teamId, setTeamId] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const navigate = useNavigate()
 
   // Fetch current user + team
   useEffect(() => {
@@ -79,6 +82,28 @@ const SendInvite = () => {
       setLoading(false)
     }
   }
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return navigate('/login')
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (error || data.role !== 'admin') {
+        navigate('/') // redirect non-admins
+      } else {
+        setIsAdmin(true)
+      }
+    }
+
+    checkAdmin()
+  }, [])
+
+  if (!isAdmin) return null
 
   return (
     <div className="max-w-md mx-auto mt-12 p-6 bg-grey shadow-lg rounded-xl">

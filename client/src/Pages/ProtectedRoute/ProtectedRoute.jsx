@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 
-const ProtectedRoute = ({ children }) => {
-  const { role } = useParams()
+const ProtectedRoute = ({ children, requiredRole }) => {
+  const { role: routeRoleParam } = useParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
 
@@ -27,8 +27,17 @@ const ProtectedRoute = ({ children }) => {
         return
       }
 
-      if (data.role !== role) {
-        navigate(`/dashboard/${data.role}`)
+      const actualRole = data.role
+
+      // 🔐 If this route requires a specific role
+      if (requiredRole && actualRole !== requiredRole) {
+        navigate(`/dashboard/${actualRole}`)
+        return
+      }
+
+      // If this route uses :role in the URL
+      if (routeRoleParam && actualRole !== routeRoleParam) {
+        navigate(`/dashboard/${actualRole}`)
         return
       }
 
@@ -36,7 +45,7 @@ const ProtectedRoute = ({ children }) => {
     }
 
     checkAuth()
-  }, [navigate, role])
+  }, [navigate, requiredRole, routeRoleParam])
 
   if (loading) {
     return <div className="p-4 text-center">Checking permissions...</div>

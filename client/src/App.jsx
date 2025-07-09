@@ -22,8 +22,15 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/join" element={<JoinTeam />} />
 
-          {/* Admin Tooling (optional protection later) */}
-          <Route path="/admin/send-invite" element={<SendInvite />} />
+          <Route
+            path="/admin/send-invite"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                  <SendInvite />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* Protected Role-Based Dashboard */}
           <Route
