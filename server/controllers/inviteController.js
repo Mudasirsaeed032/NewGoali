@@ -40,6 +40,14 @@ exports.sendInvite = async (req, res) => {
         status: 'pending'
       })
 
+    await supabase.from('activity_logs').insert({
+      team_id,
+      user_id: sent_by,
+      type: 'invite',
+      message: `Sent invite to ${email} as ${role}`
+    })
+
+
     if (insertError) throw insertError
 
     const inviteLink = `http://localhost:5173/join?token=${token}`

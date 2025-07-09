@@ -145,3 +145,33 @@ exports.getTeamInvites = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch invites', detail: err.message })
   }
 }
+
+exports.getActivityLogs = async (req, res) => {
+  const user_id = req.query.user_id
+  if (!user_id) return res.status(400).json({ error: 'Missing user_id' })
+
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('team_id')
+      .eq('id', user_id)
+      .single()
+
+    if (error || !user) throw error
+
+    const { data: logs, error: logError } = await supabase
+      .from('activity_logs')
+      .select('message, type, created_at')
+      .eq('team_id', user.team_id)
+      .order('created_at', { ascending: false })
+      .limit(15)
+
+    if (logError) throw logError
+
+    res.json({ logs })
+
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch activity feed', detail: err.message })
+  }
+}
