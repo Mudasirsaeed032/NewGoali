@@ -7,7 +7,7 @@ exports.stripeWebhook = async (req, res) => {
 
   let event
   try {
-    event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET)
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET)
   } catch (err) {
     console.error('Webhook error:', err.message)
     return res.status(400).send(`Webhook Error: ${err.message}`)
@@ -37,8 +37,11 @@ exports.stripeWebhook = async (req, res) => {
       status: 'completed',
       fundraiser_id: metadata.fundraiser_id || null,
       event_id: metadata.event_id || null,
-      team_id: user.team_id // ✅ critical for admin filtering
+      team_id: user.team_id,
+      type: 'donation'  // ✅ matches allowed values
     }
+
+
 
     // ✅ Insert into payments
     const { error: insertError } = await supabase

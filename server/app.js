@@ -15,6 +15,7 @@ const checkoutRoutes = require('./routes/checkout');
 
 const app = express()
 
+app.use('/api/payments/webhook', require('./routes/stripeRawRoute'))
 app.use(cors())
 app.use(bodyParser.json())
 app.use('/api', routes)
