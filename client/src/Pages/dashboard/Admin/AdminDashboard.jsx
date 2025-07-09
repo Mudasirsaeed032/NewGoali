@@ -5,7 +5,8 @@ import { Link } from 'react-router-dom'
 import KPIBox from './KPIBox'
 import UserTable from './UserTable.jsx'
 import InviteTable from './InviteTable.jsx'
-import AdminEventList from './AdminEventList.jsx'
+import AdminEventList from './AdminEventList.jsx';
+import AdminFundraiserList from './AdminFundraiserList.jsx';
 
 const AdminDashboard = () => {
   const [metrics, setMetrics] = useState(null)
@@ -121,6 +122,7 @@ const AdminDashboard = () => {
         )}
       </div>
       <AdminEventList />
+      <AdminFundraiserList />
     </div>
   )
 }
