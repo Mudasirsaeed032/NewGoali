@@ -7,6 +7,7 @@ import UserTable from './UserTable.jsx'
 import InviteTable from './InviteTable.jsx'
 import AdminEventList from './AdminEventList.jsx';
 import AdminFundraiserList from './AdminFundraiserList.jsx';
+import AdminPaymentsTable from './AdminPaymentstTable.jsx'
 
 const AdminDashboard = () => {
   const [metrics, setMetrics] = useState(null)
@@ -14,6 +15,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([])
   const [invites, setInvites] = useState([])
   const [logs, setLogs] = useState([])
+  const [payments, setPayments] = useState([])
 
 
   // Toggle state for sections
@@ -22,36 +24,36 @@ const AdminDashboard = () => {
   const [showActivity, setShowActivity] = useState(false)
 
   useEffect(() => {
-    const fetchAllData = async () => {
+    const fetchMetricsAndUsers = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser()
-        if (error || !user) return console.warn('User not logged in')
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (!user || userError) return
 
-        const [metricsRes, usersRes, invitesRes] = await Promise.all([
+        const [metricsRes, usersRes, invitesRes, paymentsRes] = await Promise.all([
           fetch(`http://localhost:5000/api/admin/metrics?user_id=${user.id}`),
           fetch(`http://localhost:5000/api/admin/users?user_id=${user.id}`),
-          fetch(`http://localhost:5000/api/admin/invites?user_id=${user.id}`)
+          fetch(`http://localhost:5000/api/admin/invites?user_id=${user.id}`),
+          fetch(`http://localhost:5000/api/admin/payments?user_id=${user.id}`)
         ])
-        const activityRes = await fetch(`http://localhost:5000/api/admin/activity?user_id=${user.id}`)
-        const activityData = await activityRes.json()
-        setLogs(activityData.logs)
-
 
         const metricsData = await metricsRes.json()
         const usersData = await usersRes.json()
         const invitesData = await invitesRes.json()
+        const paymentsData = await paymentsRes.json()
 
         setMetrics(metricsData)
         setUsers(usersData.users)
         setInvites(invitesData.invites)
+        setPayments(paymentsData.payments)  // ✅ add this
         setLoading(false)
       } catch (err) {
-        console.error('Error loading dashboard:', err)
+        console.error('Error in fetchMetricsAndUsers:', err)
       }
     }
 
-    fetchAllData()
+    fetchMetricsAndUsers()
   }, [])
+
 
   if (loading) return <div className="p-6">Loading dashboard...</div>
 
@@ -136,6 +138,8 @@ const AdminDashboard = () => {
       </div>
       <AdminEventList />
       <AdminFundraiserList />
+      <AdminPaymentsTable payments={payments} />
+
     </div>
   )
 }

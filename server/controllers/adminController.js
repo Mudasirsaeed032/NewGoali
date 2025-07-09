@@ -116,6 +116,34 @@ exports.getTeamUsers = async (req, res) => {
   }
 }
 
+exports.getTeamPayments = async (req, res) => {
+  const user_id = req.query.user_id
+  if (!user_id) return res.status(400).json({ error: 'Missing user_id' })
+
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select('team_id')
+      .eq('id', user_id)
+      .single()
+
+    if (error || !user) throw error
+
+    const { data: payments, error: paymentError } = await supabase
+      .from('payments')
+      .select('amount, method, created_at, fundraiser_id, event_id')
+      .eq('team_id', user.team_id)
+      .order('created_at', { ascending: false })
+
+    if (paymentError) throw paymentError
+
+    res.json({ payments })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load payments', detail: err.message })
+  }
+}
+
+
 exports.getTeamInvites = async (req, res) => {
   const user_id = req.query.user_id
   if (!user_id) return res.status(400).json({ error: 'Missing user_id' })

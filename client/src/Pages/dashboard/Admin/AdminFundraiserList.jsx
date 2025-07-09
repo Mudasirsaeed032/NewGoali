@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../supabaseClient'
+import { Link } from 'react-router-dom'
 
 const AdminFundraiserList = () => {
   const [fundraisers, setFundraisers] = useState([])
@@ -42,9 +43,7 @@ const AdminFundraiserList = () => {
 
     if (res.ok) {
       setFundraisers((prev) =>
-        prev.map((f) =>
-          f.id === id ? { ...f, status: newStatus } : f
-        )
+        prev.map((f) => (f.id === id ? { ...f, status: newStatus } : f))
       )
     } else {
       alert('Failed to update status')
@@ -89,7 +88,7 @@ const AdminFundraiserList = () => {
                 <td className="p-2">${f.goal_amount}</td>
                 <td className="p-2">${f.collected_amount}</td>
                 <td className="p-2 capitalize">{f.status}</td>
-                <td className="p-2 space-x-2">
+                <td className="p-2 flex flex-wrap gap-2">
                   {f.status === 'pending' && (
                     <button
                       onClick={() => handleStatusChange(f.id, 'published')}
@@ -101,11 +100,17 @@ const AdminFundraiserList = () => {
                   {f.status !== 'closed' && (
                     <button
                       onClick={() => handleStatusChange(f.id, 'closed')}
-                      className="px-2 py-1 text-xs bg-gray-500 text-white rounded"
+                      className="px-2 py-1 text-xs bg-gray-600 text-white rounded"
                     >
                       Close
                     </button>
                   )}
+                  <Link
+                    to={`/fundraisers/${f.id}`}
+                    className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    View Page
+                  </Link>
                 </td>
               </tr>
             ))}

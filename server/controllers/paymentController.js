@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config()
 const supabase = require('../services/supabase')
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
@@ -15,24 +15,46 @@ exports.stripeWebhook = async (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
-
     const metadata = session.metadata || {}
 
+    // ✅ Fetch team_id from user metadata
+    const { data: user, error: userErr } = await supabase
+      .from('users')
+      .select('team_id')
+      .eq('id', metadata.user_id)
+      .single()
+
+    if (userErr || !user) {
+      console.error('Failed to fetch user/team:', userErr)
+      return res.status(500).json({ error: 'Failed to get team_id' })
+    }
+
+    // ✅ Build payment object
     const newPayment = {
       user_id: metadata.user_id,
       amount: session.amount_total / 100,
       method: 'stripe',
       status: 'completed',
       fundraiser_id: metadata.fundraiser_id || null,
-      event_id: metadata.event_id || null
+      event_id: metadata.event_id || null,
+      team_id: user.team_id // ✅ critical for admin filtering
     }
 
-    const { error: insertError } = await supabase.from('payments').insert(newPayment)
-    if (insertError) console.error('Failed to store payment:', insertError)
+    // ✅ Insert into payments
+    const { error: insertError } = await supabase
+      .from('payments')
+      .insert(newPayment)
 
-    // Optional: update fundraiser collected_amount
+    if (insertError) {
+      console.error('Failed to store payment:', insertError)
+      return res.status(500).json({ error: 'Failed to store payment' })
+    }
+
+    // ✅ Update fundraiser total
     if (metadata.fundraiser_id) {
-      await supabase.rpc('update_collected_amount', { fid: metadata.fundraiser_id })
+      await supabase.rpc('update_collected_amount', {
+        fid: metadata.fundraiser_id
+      })
     }
 
     return res.status(200).json({ received: true })

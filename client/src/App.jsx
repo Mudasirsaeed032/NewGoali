@@ -11,6 +11,7 @@ import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute'
 import Layout from './Boilerplate/Layout'
 import CreateEvent from './Pages/Events/CreateEvent'
 import CreateFundraiser from './Pages/Fundraisers/CreateFundraiser'
+import FundraiserDetail from './Pages/Fundraisers/FundraiserDetail'
 
 
 function App() {
@@ -58,6 +59,9 @@ function App() {
               <CreateFundraiser />
             </ProtectedRoute>
           } />
+
+          <Route path="/fundraisers/:id" element={<FundraiserDetail />}/>
+
         </Routes>
       </Layout>
     </Router>
