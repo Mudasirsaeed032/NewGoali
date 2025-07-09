@@ -10,6 +10,7 @@ import DashboardRedirect from './Pages/DashboardRedirect/DashboardRedirect'
 import ProtectedRoute from './Pages/ProtectedRoute/ProtectedRoute'
 import Layout from './Boilerplate/Layout'
 import CreateEvent from './Pages/Events/CreateEvent'
+import CreateFundraiser from './Pages/Fundraisers/CreateFundraiser'
 
 
 function App() {
@@ -48,11 +49,15 @@ function App() {
             path="/events/create"
             element={
               <ProtectedRoute>
-                  <CreateEvent />
+                <CreateEvent />
               </ProtectedRoute>
             }
           />
-
+          <Route path='/fundraisers/create' element={
+            <ProtectedRoute>
+              <CreateFundraiser />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Layout>
     </Router>
