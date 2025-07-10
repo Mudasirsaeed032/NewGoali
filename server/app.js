@@ -13,6 +13,7 @@ const fundraiserRoutes = require('./routes/fundraisers');
 const paymentRoutes = require('./routes/payments');
 const checkoutRoutes = require('./routes/checkout');
 const athleteRoutes = require('./routes/athletes');
+const stripeRoutes = require('./routes/stripe')
 
 const app = express()
 
@@ -28,5 +29,7 @@ app.use('/api/fundraisers', fundraiserRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/athletes', athleteRoutes);
+app.use('/api/stripe', stripeRoutes)
+
 
 module.exports = app
