@@ -132,16 +132,16 @@ function Header({
           {/* User Menu or Auth Buttons */}
           <div className="flex items-center space-x-4">
             {user ? (
-              <div className="hidden md:flex items-center space-x-4">
-                <button className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">
-                  <Bell className="h-5 w-5" />
+              <div className="hidden md:flex items-center space-x-2">
+                <button className="p-2 rounded-full border border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-400 transition-colors shadow-sm flex items-center justify-center">
+                  <Bell className="h-5 w-5 text-black-600 bg-none" />
                 </button>
-                <button className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors">
-                  <User className="h-5 w-5" />
+                <button className="p-2 rounded-full border border-gray-200 bg-white hover:bg-blue-50 hover:border-blue-400 transition-colors shadow-sm flex items-center justify-center">
+                  <User className="h-5 w-5 text-black-600" />
                 </button>
                 <button
                   onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-900 transition-colors font-body"
+                  className="ml-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-body shadow-md hover:from-blue-700 hover:to-purple-700 transition-colors"
                 >
                   Logout
                 </button>

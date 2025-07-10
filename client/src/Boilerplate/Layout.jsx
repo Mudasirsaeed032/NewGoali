@@ -38,7 +38,7 @@ function Layout({
 
       {/* Main Content Area */}
       <main className={`pt-16 ${fullHeight ? "min-h-screen" : ""} ${contentClassName}`}>
-        <div className="flex-grow px-4 py-6">{children}</div>
+        <div className="flex-grow">{children}</div>
       </main>
 
       {/* Footer */}
