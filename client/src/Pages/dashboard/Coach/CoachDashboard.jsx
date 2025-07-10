@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../../supabaseClient.js';
 import InviteManagement from '../../Invites/InviteManagement.jsx';
 import AthleteManager from '../../Athletes/AthleteManager.jsx'; // adjust the path if needed
+import CoachFundraiserManager from './CoachFundraiserManager.jsx';
 
 
 const CoachDashboard = () => {
@@ -29,13 +30,19 @@ const CoachDashboard = () => {
   if (loading) return <div className="p-4">Loading Coach Dashboard...</div>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Coach Dashboard</h1>
+    <div className="p-6 text-white">
+      <h1 className="text-2xl font-bold mb-6">Coach Dashboard</h1>
 
-      {/* Invite Section */}
-      <InviteManagement teamId={teamId} userRole="coach" />
-      <AthleteManager teamId={teamId} canCreate={true} />
+      <div className="space-y-12">
+        <section><InviteManagement teamId={teamId} userRole="coach" /></section>
+        <section>
+          <CoachFundraiserManager />
+        </section>
 
+        <section>
+          <AthleteManager />
+        </section>
+      </div>
     </div>
   );
 };

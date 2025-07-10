@@ -15,6 +15,8 @@ import FundraiserDetail from './Pages/Fundraisers/FundraiserDetail'
 import EventDetail from './Pages/Events/EventDetail'
 import MyTickets from './Pages/Events/MyTickets'
 import AthleteManager from './Pages/Athletes/AthleteManager'
+import PublicFundraiserList from './Pages/Fundraisers/PublicFundraiserList'
+import PublicEventList from './Pages/Events/PublicEventList'
 
 
 function App() {
@@ -74,6 +76,15 @@ function App() {
               <AthleteManager />
             </ProtectedRoute>
           } />
+
+          <Route path='/fundraisers' element={
+            <PublicFundraiserList />
+          }/>
+
+          <Route path='/events' element={
+            <PublicEventList />
+          }/>
+
         </Routes>
       </Layout>
     </Router>

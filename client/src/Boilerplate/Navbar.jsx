@@ -35,8 +35,8 @@ const Navbar = () => {
       <div className="space-x-4">
         {/* Always visible */}
         <Link to="/dashboard/:role" className="hover:underline">Dashboard</Link>
-        <Link to="/fundraisers/sample-id" className="hover:underline">Fundraiser</Link>
-        <Link to="/events/sample-id" className="hover:underline">Event</Link>
+        <Link to="/fundraisers" className="hover:underline">Fundraiser</Link>
+        <Link to="/events" className="hover:underline">Event</Link>
 
         {user && (
           <>
