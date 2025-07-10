@@ -13,6 +13,7 @@ import CreateEvent from './Pages/Events/CreateEvent'
 import CreateFundraiser from './Pages/Fundraisers/CreateFundraiser'
 import FundraiserDetail from './Pages/Fundraisers/FundraiserDetail'
 import EventDetail from './Pages/Events/EventDetail'
+import MyTickets from './Pages/Events/MyTickets'
 
 
 function App() {
@@ -65,6 +66,7 @@ function App() {
 
           <Route path='/events/:id' element={<EventDetail />} />
 
+          <Route path='/my-tickets' element={<MyTickets />} />
         </Routes>
       </Layout>
     </Router>

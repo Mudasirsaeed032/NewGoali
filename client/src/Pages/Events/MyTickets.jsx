@@ -42,7 +42,7 @@ const MyTickets = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {tickets.map((ticket) => (
-          <div key={ticket.id} className="bg-white p-4 shadow rounded border">
+          <div key={ticket.id} className="bg-gray p-4 shadow rounded border">
             <h3 className="text-lg font-semibold mb-1">{ticket.events?.title}</h3>
             <p className="text-sm text-gray-500 mb-2">
               {new Date(ticket.events?.date).toDateString()} | {ticket.events?.location}

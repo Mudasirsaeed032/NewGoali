@@ -203,3 +203,45 @@ exports.getActivityLogs = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch activity feed', detail: err.message })
   }
 }
+
+exports.removeUserFromTeam = async (req, res) => {
+  const { user_id, admin_id } = req.body
+
+  if (!user_id || !admin_id) {
+    return res.status(400).json({ error: 'Missing user_id or admin_id' })
+  }
+
+  // Check admin's role and team
+  const { data: admin, error: adminErr } = await supabase
+    .from('users')
+    .select('role, team_id')
+    .eq('id', admin_id)
+    .single()
+
+  if (adminErr || admin.role !== 'admin') {
+    return res.status(403).json({ error: 'Not authorized' })
+  }
+
+  // Fetch target user
+  const { data: target, error: targetErr } = await supabase
+    .from('users')
+    .select('team_id')
+    .eq('id', user_id)
+    .single()
+
+  if (targetErr || target.team_id !== admin.team_id) {
+    return res.status(403).json({ error: 'Cannot remove this user' })
+  }
+
+  // Delete user
+  const { error: deleteErr } = await supabase
+    .from('users')
+    .delete()
+    .eq('id', user_id)
+
+  if (deleteErr) {
+    return res.status(500).json({ error: 'Failed to delete user' })
+  }
+
+  res.json({ message: 'User removed successfully' })
+}
