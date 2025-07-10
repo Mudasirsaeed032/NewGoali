@@ -18,7 +18,6 @@ const AthleteManager = () => {
       const team_id = userData.team_id
       setTeamId(team_id)
 
-      // 1. Get users (athletes)
       const { data: userList } = await supabase
         .from('users')
         .select('id, full_name, email')
@@ -27,7 +26,6 @@ const AthleteManager = () => {
 
       setAthleteUsers(userList)
 
-      // 2. Get existing athlete profiles
       const res = await fetch(`http://localhost:5000/api/athletes/by-team/${team_id}`)
       const { athletes } = await res.json()
       setAthletes(athletes)
@@ -95,61 +93,61 @@ const AthleteManager = () => {
     setAthletes(athletes)
   }
 
-  const hasProfile = (user_id) => athletes.some((a) => a.user_id === user_id)
-
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-5xl mx-auto text-gray-900">
       <h2 className="text-2xl font-bold mb-4">{editingId ? 'Edit Athlete Profile' : 'Create Athlete Profile'}</h2>
 
       {form.user_id && (
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <input type="text" name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" required className="border p-2 rounded" />
-          <input type="text" name="position" value={form.position} onChange={handleChange} placeholder="Position" className="border p-2 rounded" />
-          <input type="number" name="age" value={form.age} onChange={handleChange} placeholder="Age" className="border p-2 rounded" />
-          <input type="number" name="jersey_number" value={form.jersey_number} onChange={handleChange} placeholder="Jersey #" className="border p-2 rounded" />
-          <button type="submit" className="col-span-full bg-blue-600 text-white py-2 rounded">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-gray-100 p-4 rounded shadow">
+          <input type="text" name="full_name" value={form.full_name} onChange={handleChange} placeholder="Full Name" required className="border p-2 rounded bg-white" />
+          <input type="text" name="position" value={form.position} onChange={handleChange} placeholder="Position" className="border p-2 rounded bg-white" />
+          <input type="number" name="age" value={form.age} onChange={handleChange} placeholder="Age" className="border p-2 rounded bg-white" />
+          <input type="number" name="jersey_number" value={form.jersey_number} onChange={handleChange} placeholder="Jersey #" className="border p-2 rounded bg-white" />
+          <button type="submit" className="col-span-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
             {editingId ? 'Update Profile' : 'Create Profile'}
           </button>
         </form>
       )}
 
-      <h3 className="text-xl font-semibold mb-2">Athletes</h3>
-      <table className="w-full text-sm text-left">
-        <thead className="bg-gray-100 text-gray-700">
-          <tr>
-            <th className="p-2">Name</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Position</th>
-            <th className="p-2">Jersey</th>
-            <th className="p-2">Age</th>
-            <th className="p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {athleteUsers.map((u) => {
-            const profile = athletes.find((a) => a.user_id === u.id)
-            return (
-              <tr key={u.id} className="border-t">
-                <td className="p-2">{u.full_name}</td>
-                <td className="p-2">{u.email}</td>
-                <td className="p-2">{profile?.position || '-'}</td>
-                <td className="p-2">{profile?.jersey_number || '-'}</td>
-                <td className="p-2">{profile?.age || '-'}</td>
-                <td className="p-2 space-x-2">
-                  {profile ? (
-                    <>
-                      <button onClick={() => handleEdit(profile)} className="text-blue-600 text-xs">Edit</button>
-                      <button onClick={() => handleDelete(profile.id)} className="text-red-600 text-xs">Delete</button>
-                    </>
-                  ) : (
-                    <button onClick={() => handleCreate(u.id, u.full_name)} className="text-green-600 text-xs">Create Profile</button>
-                  )}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+      <h3 className="text-xl font-semibold mb-3">Athletes</h3>
+      <div className="overflow-x-auto bg-white shadow rounded-lg">
+        <table className="min-w-full text-sm text-left text-gray-800">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-2">Name</th>
+              <th className="p-2">Email</th>
+              <th className="p-2">Position</th>
+              <th className="p-2">Jersey</th>
+              <th className="p-2">Age</th>
+              <th className="p-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {athleteUsers.map((u) => {
+              const profile = athletes.find((a) => a.user_id === u.id)
+              return (
+                <tr key={u.id} className="border-t border-gray-200">
+                  <td className="p-2">{u.full_name}</td>
+                  <td className="p-2">{u.email}</td>
+                  <td className="p-2">{profile?.position || '-'}</td>
+                  <td className="p-2">{profile?.jersey_number || '-'}</td>
+                  <td className="p-2">{profile?.age || '-'}</td>
+                  <td className="p-2 space-x-2">
+                    {profile ? (
+                      <>
+                        <button onClick={() => handleEdit(profile)} className="text-blue-600 hover:underline text-xs">Edit</button>
+                        <button onClick={() => handleDelete(profile.id)} className="text-red-600 hover:underline text-xs">Delete</button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleCreate(u.id, u.full_name)} className="text-green-600 hover:underline text-xs">Create Profile</button>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

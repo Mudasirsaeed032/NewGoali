@@ -16,6 +16,8 @@ const AdminDashboard = () => {
   const [invites, setInvites] = useState([])
   const [logs, setLogs] = useState([])
   const [payments, setPayments] = useState([])
+  const [isStripeConnected, setIsStripeConnected] = useState(false)
+
 
 
   // Toggle state for sections
@@ -40,6 +42,19 @@ const AdminDashboard = () => {
         const usersData = await usersRes.json()
         const invitesData = await invitesRes.json()
         const paymentsData = await paymentsRes.json()
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('team_id')
+          .eq('id', user.id)
+          .single()
+
+        const { data: team } = await supabase
+          .from('teams')
+          .select('stripe_connect_id')
+          .eq('id', userRow.team_id)
+          .single()
+
+        setIsStripeConnected(!!team?.stripe_connect_id)
 
         setMetrics(metricsData)
         setUsers(usersData.users)
@@ -54,6 +69,13 @@ const AdminDashboard = () => {
     fetchMetricsAndUsers()
   }, [])
 
+  const handleStripeConnect = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    const res = await fetch(`http://localhost:5000/api/stripe/connect?user_id=${user.id}`)
+    const { url } = await res.json()
+    if (url) window.location.href = url
+  }
+
 
   if (loading) return <div className="p-6">Loading dashboard...</div>
 
@@ -63,6 +85,15 @@ const AdminDashboard = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Admin Dashboard</h1>
         <div>
+          {!isStripeConnected && (
+            <button
+              onClick={handleStripeConnect}
+              className="bg-purple-600 text-white px-4 py-2 rounded mb-6"
+            >
+              Connect Stripe
+            </button>
+          )}
+
           <Link
             to="/events/create"
             className="bg-blue-600 text-white mx-2 px-4 py-2 rounded hover:bg-blue-700 text-sm"
