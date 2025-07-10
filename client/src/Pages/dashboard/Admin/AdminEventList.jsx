@@ -6,6 +6,7 @@ const AdminEventList = () => {
   const [events, setEvents] = useState([])
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [ticketCounts, setTicketCounts] = useState({});
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -30,6 +31,25 @@ const AdminEventList = () => {
 
     fetchEvents()
   }, [filter])
+
+  useEffect(() => {
+    const fetchTicketCounts = async () => {
+      const counts = {}
+
+      for (let ev of events) {
+        const { count, error } = await supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', ev.id)
+
+        if (!error) counts[ev.id] = count
+      }
+
+      setTicketCounts(counts)
+    }
+
+    if (events?.length > 0) fetchTicketCounts()
+  }, [events])
 
   const handleStatusChange = async (eventId, newStatus) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -74,12 +94,14 @@ const AdminEventList = () => {
         <p className="text-gray-500">No events found.</p>
       ) : (
         <table className="w-full text-sm border">
-          <thead className="bg-gray-100 text-left">
+          <thead className="bg-white-100 text-left">
             <tr>
               <th className="p-2">Title</th>
               <th className="p-2">Date</th>
               <th className="p-2">Location</th>
+              <th className="p-2">Price</th>
               <th className="p-2">Status</th>
+              <th className="p-2">🎫 Tickets Sold</th>
               <th className="p-2">Actions</th>
             </tr>
           </thead>
@@ -89,7 +111,9 @@ const AdminEventList = () => {
                 <td className="p-2">{ev.title}</td>
                 <td className="p-2">{new Date(ev.date).toLocaleDateString()}</td>
                 <td className="p-2">{ev.location}</td>
+                <td className="p-2">${ev.price}</td>
                 <td className="p-2 capitalize">{ev.status}</td>
+                <td className="p-2">{ticketCounts[ev.id] ?? '...'}</td>
                 <td className="p-2 space-x-2">
                   {ev.status === 'pending' && (
                     <button

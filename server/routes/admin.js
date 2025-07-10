@@ -4,7 +4,8 @@ const {
     getTeamUsers,
     getTeamInvites,
     getActivityLogs,
-    getTeamPayments
+    getTeamPayments,
+    removeUserFromTeam
 } = require('../controllers/adminController')
 
 const router = express.Router()
@@ -14,6 +15,7 @@ router.get('/users', getTeamUsers);
 router.get('/invites', getTeamInvites);
 router.get('/activity', getActivityLogs);
 router.get('/payments', getTeamPayments);
+router.post('/remove-user', removeUserFromTeam)
 
 
 
