@@ -61,34 +61,111 @@ exports.stripeWebhook = async (req, res) => {
       })
     }
     // ✅ Ticket generation
-  if (metadata.event_id) {
-    const ticketData = {
-      user_id: metadata.user_id,
-      event_id: metadata.event_id,
-    }
+    if (metadata.event_id) {
+      const ticketData = {
+        user_id: metadata.user_id,
+        event_id: metadata.event_id,
+      }
 
-    const ticketPayload = JSON.stringify({
-      user_id: metadata.user_id,
-      event_id: metadata.event_id,
-      purchased_at: new Date().toISOString(),
-    })
-
-    const qrDataURL = await QRCode.toDataURL(ticketPayload)
-
-    const { error: ticketError } = await supabase
-      .from('tickets')
-      .insert({
-        ...ticketData,
-        qr_code_url: qrDataURL
+      const ticketPayload = JSON.stringify({
+        user_id: metadata.user_id,
+        event_id: metadata.event_id,
+        purchased_at: new Date().toISOString(),
       })
 
-    if (ticketError) {
-      console.error('Failed to insert ticket:', ticketError)
+      const qrDataURL = await QRCode.toDataURL(ticketPayload)
+
+      const { error: ticketError } = await supabase
+        .from('tickets')
+        .insert({
+          ...ticketData,
+          qr_code_url: qrDataURL
+        })
+
+      if (ticketError) {
+        console.error('Failed to insert ticket:', ticketError)
+      }
     }
-  }
 
     return res.status(200).json({ received: true })
   }
 
   res.status(200).json({ received: true })
 }
+
+exports.createCheckoutSession = async (req, res) => {
+  const { user_id, amount, fundraiser_id, event_id } = req.body;
+
+  try {
+    // ✅ Get user's team_id
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .select('team_id')
+      .eq('id', user_id)
+      .single();
+
+    if (userError || !userRow) {
+      console.error('Invalid user or missing team_id');
+      return res.status(400).json({ error: 'Invalid user/team' });
+    }
+
+    // ✅ Get the team's Stripe Connect account
+    const { data: teamRow, error: teamError } = await supabase
+      .from('teams')
+      .select('stripe_connect_id')
+      .eq('id', userRow.team_id)
+      .single();
+
+    if (teamError || !teamRow?.stripe_connect_id) {
+      console.error('Team Stripe Connect not found');
+      return res.status(400).json({ error: 'Team has not connected Stripe' });
+    }
+
+    const platformFee = Math.floor(amount * 0.05 * 100); // 5% fee in cents
+
+    // ✅ Debug log for testing
+    console.log('Creating checkout session:', {
+      amount,
+      platformFee,
+      destination: teamRow.stripe_connect_id,
+      isFundraiser: Boolean(fundraiser_id),
+      isEvent: Boolean(event_id)
+    });
+
+    // ✅ Create Checkout Session with fee split
+    const session = await stripe.checkout.sessions.create({
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: amount * 100,
+            product_data: {
+              name: fundraiser_id ? 'Fundraiser Donation' : 'Event Ticket'
+            }
+          },
+          quantity: 1
+        }
+      ],
+      payment_intent_data: {
+        application_fee_amount: platformFee,
+        transfer_data: {
+          destination: teamRow.stripe_connect_id
+        }
+      },
+      metadata: {
+        user_id,
+        fundraiser_id: fundraiser_id || '',
+        event_id: event_id || ''
+      },
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`
+    });
+
+    return res.json({ url: session.url });
+
+  } catch (error) {
+    console.error('Failed to create checkout session:', error);
+    return res.status(500).json({ error: 'Failed to create checkout session' });
+  }
+};
