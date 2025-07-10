@@ -14,6 +14,7 @@ import CreateFundraiser from './Pages/Fundraisers/CreateFundraiser'
 import FundraiserDetail from './Pages/Fundraisers/FundraiserDetail'
 import EventDetail from './Pages/Events/EventDetail'
 import MyTickets from './Pages/Events/MyTickets'
+import AthleteManager from './Pages/Athletes/AthleteManager'
 
 
 function App() {
@@ -67,6 +68,12 @@ function App() {
           <Route path='/events/:id' element={<EventDetail />} />
 
           <Route path='/my-tickets' element={<MyTickets />} />
+
+          <Route path='/dashboard/athletes' element={
+            <ProtectedRoute>
+              <AthleteManager />
+            </ProtectedRoute>
+          } />
         </Routes>
       </Layout>
     </Router>

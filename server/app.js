@@ -27,6 +27,6 @@ app.use('/api/events', eventRoutes);
 app.use('/api/fundraisers', fundraiserRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/checkout', checkoutRoutes);
-app.use('/api/athlete', athleteRoutes);
+app.use('/api/athletes', athleteRoutes);
 
 module.exports = app

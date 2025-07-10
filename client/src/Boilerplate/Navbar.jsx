@@ -39,7 +39,10 @@ const Navbar = () => {
         <Link to="/events/sample-id" className="hover:underline">Event</Link>
 
         {user && (
-          <Link to="/my-tickets" className="hover:underline">My Tickets</Link>
+          <>
+            <Link to="/my-tickets" className="hover:underline">My Tickets</Link>
+            <Link to="/dashboard/athletes" className="hover:underline">Manage Athletes</Link>
+          </>
         )}
 
         {user ? (
