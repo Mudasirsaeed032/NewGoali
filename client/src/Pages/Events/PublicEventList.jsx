@@ -25,7 +25,7 @@ const PublicEventList = () => {
             <p className="text-sm text-gray-300">Price: ${e.price}</p>
             <p className="text-sm text-gray-400">Date: {new Date(e.date).toLocaleDateString()}</p>
             <Link
-              to={`/event/${e.id}`}
+              to={`/events/${e.id}`}
               className="inline-block mt-2 text-blue-400 underline"
             >
               View / Buy Ticket

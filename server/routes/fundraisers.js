@@ -1,6 +1,5 @@
 const express = require('express')
 const supabase = require('../services/supabase')
-
 const router = express.Router()
 const {
   createFundraiser,

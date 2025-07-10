@@ -24,7 +24,7 @@ const PublicFundraiserList = () => {
             <p className="text-sm text-gray-300">Goal: ${f.goal_amount}</p>
             <p className="text-sm text-gray-400">Status: {f.status}</p>
             <Link
-              to={`/fundraiser/${f.id}`}
+              to={`/fundraisers/${f.id}`}
               className="inline-block mt-2 text-blue-400 underline"
             >
               View / Donate

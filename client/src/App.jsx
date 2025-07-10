@@ -17,6 +17,7 @@ import MyTickets from './Pages/Events/MyTickets'
 import AthleteManager from './Pages/Athletes/AthleteManager'
 import PublicFundraiserList from './Pages/Fundraisers/PublicFundraiserList'
 import PublicEventList from './Pages/Events/PublicEventList'
+import PublicFundraiserEventList from './Pages/PublicFundraiserEventList'
 
 
 function App() {
@@ -84,6 +85,10 @@ function App() {
           <Route path='/events' element={
             <PublicEventList />
           }/>
+
+          <Route path='/explore' element={
+            <PublicFundraiserEventList />
+          } />
 
         </Routes>
       </Layout>
