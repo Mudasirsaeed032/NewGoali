@@ -148,7 +148,7 @@ const AdminDashboard = () => {
               whileTap={{ scale: 0.95 }}
             >
               <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-body text-white">Back to Home</span>
+              <span className="font-body">Back to Home</span>
             </motion.button>
 
             {/* Logo */}
@@ -243,7 +243,7 @@ const AdminDashboard = () => {
                       <IconComponent
                         className={`h-5 w-5 ${activeTab === tab.id ? "text-blue-600" : "text-gray-500"}`}
                       />
-                      <span className="font-header text-white">{tab.label}</span>
+                      <span className="font-header">{tab.label}</span>
                     </div>
                     <p className={`text-sm font-body ${activeTab === tab.id ? "text-blue-700" : "text-gray-500"}`}>
                       {tab.description}

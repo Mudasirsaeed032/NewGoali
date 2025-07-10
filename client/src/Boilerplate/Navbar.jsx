@@ -104,24 +104,24 @@ function Header({
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/dashboard/:role" className="text-gray-600 hover:text-gray-900 transition-colors font-body">
+            <Link to="/dashboard/:role" className="text-black hover:text-gray-900 transition-colors font-body">
               Dashboard
             </Link>
-            <Link to="/fundraisers" className="text-gray-600 hover:text-gray-900 transition-colors font-body">
+            <Link to="/fundraisers" className="text-black hover:text-gray-900 transition-colors font-body">
               Fundraiser
             </Link>
-            <Link to="/events" className="text-gray-600 hover:text-gray-900 transition-colors font-body">
+            <Link to="/events" className="text-black hover:text-gray-900 transition-colors font-body">
               Event
             </Link>
 
             {user && (
               <>
-                <Link to="/my-tickets" className="text-gray-600 hover:text-gray-900 transition-colors font-body">
+                <Link to="/my-tickets" className="text-black hover:text-gray-900 transition-colors font-body">
                   My Tickets
                 </Link>
                 <Link
                   to="/dashboard/athletes"
-                  className="text-gray-600 hover:text-gray-900 transition-colors font-body"
+                  className="text-black hover:text-gray-900 transition-colors font-body"
                 >
                   Manage Athletes
                 </Link>
