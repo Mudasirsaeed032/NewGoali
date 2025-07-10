@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../supabaseClient'
+import { Link } from 'react-router-dom'
 
 const AdminEventList = () => {
   const [events, setEvents] = useState([])
@@ -106,6 +107,12 @@ const AdminEventList = () => {
                       Close
                     </button>
                   )}
+                  <Link
+                    to={`/events/${ev.id}`}
+                    className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    View Page
+                  </Link>
                 </td>
               </tr>
             ))}

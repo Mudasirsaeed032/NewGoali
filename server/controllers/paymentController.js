@@ -38,7 +38,7 @@ exports.stripeWebhook = async (req, res) => {
       fundraiser_id: metadata.fundraiser_id || null,
       event_id: metadata.event_id || null,
       team_id: user.team_id,
-      type: 'donation'  // ✅ matches allowed values
+      type: metadata.event_id ? 'ticket' : 'donation'  // ✅ matches allowed values
     }
 
 
