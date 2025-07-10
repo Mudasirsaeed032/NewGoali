@@ -13,7 +13,8 @@ const fundraiserRoutes = require('./routes/fundraisers');
 const paymentRoutes = require('./routes/payment');
 const checkoutRoutes = require('./routes/checkout');
 const athleteRoutes = require('./routes/athletes');
-const stripeRoutes = require('./routes/stripe')
+const stripeRoutes = require('./routes/stripe');
+const coachRoutes = require('./routes/coach');
 
 const app = express()
 
@@ -29,7 +30,8 @@ app.use('/api/fundraisers', fundraiserRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/checkout', checkoutRoutes);
 app.use('/api/athletes', athleteRoutes);
-app.use('/api/stripe', stripeRoutes)
+app.use('/api/stripe', stripeRoutes);
+app.use('/api/coach', coachRoutes);
 
 
 module.exports = app

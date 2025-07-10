@@ -99,3 +99,17 @@ exports.updateFundraiserStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update fundraiser', detail: err.message })
   }
 }
+
+exports.updateFundraiser = async (req, res) => {
+  const { id } = req.params
+  const updates = req.body
+
+  const { error } = await supabase
+    .from('fundraisers')
+    .update(updates)
+    .eq('id', id)
+
+  if (error) return res.status(500).json({ error: 'Failed to update fundraiser' })
+
+  res.json({ message: 'Fundraiser updated successfully' })
+}

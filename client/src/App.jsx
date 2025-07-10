@@ -17,8 +17,9 @@ import MyTickets from './Pages/Events/MyTickets'
 import AthleteManager from './Pages/Athletes/AthleteManager'
 import PublicFundraiserList from './Pages/Fundraisers/PublicFundraiserList'
 import PublicEventList from './Pages/Events/PublicEventList'
-import PublicFundraiserEventList from './Pages/PublicFundraiserEventList'
-
+import CoachFundraiserDonations from './Pages/dashboard/Coach/CoachFundraiserDonations'
+import CoachTeamMembers from './Pages/dashboard/Coach/CoachTeamMembers'
+import CoachFundraiserManager from './Pages/dashboard/Coach/CoachFundraiserManager'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -80,14 +81,28 @@ function App() {
 
           <Route path='/fundraisers' element={
             <PublicFundraiserList />
-          }/>
+          } />
 
           <Route path='/events' element={
             <PublicEventList />
-          }/>
+          } />
 
-          <Route path='/explore' element={
-            <PublicFundraiserEventList />
+          <Route path='/coach/donations' element={
+            <ProtectedRoute>
+              <CoachFundraiserDonations />
+            </ProtectedRoute>
+          } />
+
+          <Route path='/coach/team-members' element={
+            <ProtectedRoute>
+              <CoachTeamMembers />
+            </ProtectedRoute>
+          } />
+
+          <Route path='/coach/fundraisers/manage' element={
+            <ProtectedRoute>
+              <CoachFundraiserManager />
+            </ProtectedRoute>
           } />
 
         </Routes>

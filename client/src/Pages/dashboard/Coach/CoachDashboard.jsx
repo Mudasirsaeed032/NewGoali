@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../../../supabaseClient.js';
+import { Link } from 'react-router-dom';
 import InviteManagement from '../../Invites/InviteManagement.jsx';
 import AthleteManager from '../../Athletes/AthleteManager.jsx'; // adjust the path if needed
 import CoachFundraiserManager from './CoachFundraiserManager.jsx';
@@ -36,13 +37,23 @@ const CoachDashboard = () => {
       <div className="space-y-12">
         <section><InviteManagement teamId={teamId} userRole="coach" /></section>
         <section>
-          <CoachFundraiserManager />
+          <Link to="/coach/fundraisers/manage" className="hover:underline">Manage Fundraisers</Link>
         </section>
 
         <section>
           <AthleteManager />
         </section>
+
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        <Link to="/coach/team-members" className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 text-center">
+          Manage Team Members
+        </Link>
+        <Link to="/coach/donations" className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 text-center">
+          Track Donations
+        </Link>
+      </div>
+
     </div>
   );
 };
