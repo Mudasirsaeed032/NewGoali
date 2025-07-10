@@ -111,14 +111,14 @@ const Login = () => {
       {/* Back Button */}
       <motion.button
         onClick={() => navigate("/")}
-        className="absolute top-6 left-6 z-50 flex items-center space-x-2 text-white/80 hover:text-white transition-colors group"
+        className="absolute bg-transparent top-6 left-6 z-50 flex items-center space-x-2 text-white/80 hover:text-white transition-colors group"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
         whileHover={{ scale: 1.05 }}
       >
         <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-        <span className="font-body">Back to Home</span>
+        <span className="font-body ">Back to Home</span>
       </motion.button>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -251,7 +251,7 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
+                      className="absolute bg-transparent right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white transition-colors"
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
@@ -269,7 +269,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => navigate("/forgot-password")}
-                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors font-body"
+                    className="text-sm bg-transparent text-blue-400 hover:text-blue-300 transition-colors font-body"
                   >
                     Forgot password?
                   </button>
@@ -280,7 +280,7 @@ const Login = () => {
                   disabled={loading || !form.email || !form.password}
                   className={`w-full py-4 rounded-xl font-header text-lg transition-all duration-200 ${
                     loading || !form.email || !form.password
-                      ? "bg-gray-600 cursor-not-allowed"
+                      ? "bg-gray-900  cursor-not-allowed"
                       : `bg-gradient-to-r from-green-500 to-green-600 hover:shadow-lg hover:scale-[1.02]`
                   } text-white`}
                   whileHover={!loading && form.email && form.password ? { scale: 1.02 } : {}}
@@ -289,7 +289,7 @@ const Login = () => {
                   {loading ? (
                     <div className="flex items-center justify-center space-x-2">
                       <motion.div
-                        className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                        className="w-5 h-5 border-2  border-white/30 border-t-white rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
                       />
@@ -306,7 +306,7 @@ const Login = () => {
                     <button
                       type="button"
                       onClick={() => navigate("/signup")}
-                      className="text-blue-400 hover:text-blue-300 transition-colors font-header"
+                      className="text-blue-400 bg-gray-800 hover:text-blue-300 transition-colors font-header"
                     >
                       Sign up here
                     </button>
