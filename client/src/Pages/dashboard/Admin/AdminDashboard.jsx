@@ -8,6 +8,7 @@ import InviteTable from './InviteTable.jsx'
 import AdminEventList from './AdminEventList.jsx';
 import AdminFundraiserList from './AdminFundraiserList.jsx';
 import AdminPaymentsTable from './AdminPaymentstTable.jsx'
+import AthleteManager from './AthleteManager.jsx'
 
 const AdminDashboard = () => {
   const [metrics, setMetrics] = useState(null)
@@ -139,6 +140,7 @@ const AdminDashboard = () => {
       <AdminEventList />
       <AdminFundraiserList />
       <AdminPaymentsTable payments={payments} />
+      <AthleteManager />
 
     </div>
   )

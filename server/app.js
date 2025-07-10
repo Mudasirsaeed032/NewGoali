@@ -12,6 +12,7 @@ const eventRoutes = require('./routes/events');
 const fundraiserRoutes = require('./routes/fundraisers');
 const paymentRoutes = require('./routes/payments');
 const checkoutRoutes = require('./routes/checkout');
+const athleteRoutes = require('./routes/athletes');
 
 const app = express()
 
@@ -26,5 +27,6 @@ app.use('/api/events', eventRoutes);
 app.use('/api/fundraisers', fundraiserRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/athlete', athleteRoutes);
 
 module.exports = app
