@@ -14,12 +14,10 @@ const Navbar = () => {
 
     fetchUser()
 
-    // 👇 Listen for login/logout/auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null)
     })
 
-    // Cleanup on unmount
     return () => {
       authListener.subscription.unsubscribe()
     }
@@ -33,11 +31,18 @@ const Navbar = () => {
   return (
     <nav className="bg-gray-800 text-white p-4 flex justify-between items-center">
       <Link to="/" className="text-xl font-bold">GOALI</Link>
+
       <div className="space-x-4">
+        {/* Always visible */}
+        <Link to="/fundraisers/sample-id" className="hover:underline">Fundraiser</Link>
+        <Link to="/events/sample-id" className="hover:underline">Event</Link>
+
+        {user && (
+          <Link to="/my-tickets" className="hover:underline">My Tickets</Link>
+        )}
+
         {user ? (
-          <>
-            <button onClick={handleLogout} className="hover:underline">Logout</button>
-          </>
+          <button onClick={handleLogout} className="hover:underline">Logout</button>
         ) : (
           <>
             <Link to="/signup/org" className="hover:underline">Start Org</Link>

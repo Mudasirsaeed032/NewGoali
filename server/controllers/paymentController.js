@@ -1,5 +1,6 @@
-require('dotenv').config()
-const supabase = require('../services/supabase')
+require('dotenv').config();
+const supabase = require('../services/supabase');
+const QRCode = require('qrcode');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 exports.stripeWebhook = async (req, res) => {
@@ -59,6 +60,32 @@ exports.stripeWebhook = async (req, res) => {
         fid: metadata.fundraiser_id
       })
     }
+    // ✅ Ticket generation
+  if (metadata.event_id) {
+    const ticketData = {
+      user_id: metadata.user_id,
+      event_id: metadata.event_id,
+    }
+
+    const ticketPayload = JSON.stringify({
+      user_id: metadata.user_id,
+      event_id: metadata.event_id,
+      purchased_at: new Date().toISOString(),
+    })
+
+    const qrDataURL = await QRCode.toDataURL(ticketPayload)
+
+    const { error: ticketError } = await supabase
+      .from('tickets')
+      .insert({
+        ...ticketData,
+        qr_code_url: qrDataURL
+      })
+
+    if (ticketError) {
+      console.error('Failed to insert ticket:', ticketError)
+    }
+  }
 
     return res.status(200).json({ received: true })
   }
