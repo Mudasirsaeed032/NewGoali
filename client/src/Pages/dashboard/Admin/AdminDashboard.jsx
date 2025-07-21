@@ -245,9 +245,6 @@ const AdminDashboard = () => {
                       />
                       <span className="font-header">{tab.label}</span>
                     </div>
-                    <p className={`text-sm font-body ${activeTab === tab.id ? "text-blue-700" : "text-gray-500"}`}>
-                      {tab.description}
-                    </p>
                   </motion.button>
                 )
               })}

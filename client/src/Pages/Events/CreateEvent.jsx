@@ -11,7 +11,7 @@ const CreateEvent = () => {
     date: "",
     location: "",
     price: "",
-    goal_amount: "",
+    max_tickets: "",
   })
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -34,7 +34,7 @@ const CreateEvent = () => {
     if (!form.date) newErrors.date = "Event date is required"
     if (!form.location.trim()) newErrors.location = "Event location is required"
     if (form.price && isNaN(form.price)) newErrors.price = "Price must be a valid number"
-    if (form.goal_amount && isNaN(form.goal_amount)) newErrors.goal_amount = "Goal amount must be a valid number"
+    if (!form.max_tickets || isNaN(form.max_tickets)) newErrors.max_tickets = "Max tickets must be a valid number";
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -243,20 +243,21 @@ const CreateEvent = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-gray-300 text-sm">Fundraising Goal ($)</label>
+                    <label className="text-gray-300 text-sm">Max Tickets</label>
                     <input
                       type="number"
-                      name="goal_amount"
-                      value={form.goal_amount}
-                      placeholder="0.00"
+                      name="max_tickets"
+                      value={form.max_tickets}
+                      placeholder="e.g. 50"
                       onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      className={`w-full px-4 py-3 bg-white/10 border ${errors.goal_amount ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
+                      min="1"
+                      step="1"
+                      className={`w-full px-4 py-3 bg-white/10 border ${errors.max_tickets ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
                     />
-                    {errors.goal_amount && <p className="text-red-400 text-sm">{errors.goal_amount}</p>}
-                    <p className="text-gray-400 text-xs">Optional fundraising target</p>
+                    {errors.max_tickets && <p className="text-red-400 text-sm">{errors.max_tickets}</p>}
+                    <p className="text-gray-400 text-xs">Total number of tickets you want to sell</p>
                   </div>
+
                 </div>
               </div>
 

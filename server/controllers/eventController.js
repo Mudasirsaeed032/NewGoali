@@ -2,9 +2,10 @@ const supabase = require('../services/supabase')
 
 // Create Event (Admin or Coach)
 exports.createEvent = async (req, res) => {
-  const { title, description, location, date, price, goal_amount, created_by } = req.body
+  const { title, description, location, date, price, max_tickets, created_by } = req.body
 
-  if (!title || !location || !date || !created_by) {
+
+  if (!title || !location || !date || !created_by || !max_tickets) {
     return res.status(400).json({ error: 'Missing required fields' })
   }
 
@@ -29,7 +30,7 @@ exports.createEvent = async (req, res) => {
         location,
         date,
         price,
-        goal_amount,
+        max_tickets,
         created_by,
         team_id,
         status

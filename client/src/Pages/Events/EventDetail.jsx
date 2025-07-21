@@ -1,5 +1,3 @@
-"use client"
-
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { supabase } from "../../supabaseClient"
@@ -9,6 +7,8 @@ const EventDetail = () => {
   const [event, setEvent] = useState(null)
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [ticketsSold, setTicketsSold] = useState(0)
+  const [copySuccess, setCopySuccess] = useState(false)
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -24,8 +24,14 @@ const EventDetail = () => {
       setUser(user)
     }
 
+    const fetchTicketCount = async () => {
+      const { count } = await supabase.from("tickets").select("*", { count: "exact", head: true }).eq("event_id", id)
+      setTicketsSold(count || 0)
+    }
+
     fetchEvent()
     fetchUser()
+    fetchTicketCount()
   }, [id])
 
   const handleBuyTicket = async () => {
@@ -50,6 +56,34 @@ const EventDetail = () => {
     }
   }
 
+  const handleShareEvent = async () => {
+    try {
+      const currentUrl = window.location.href
+
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(currentUrl)
+      } else {
+        // Fallback for older browsers or non-secure contexts
+        const textArea = document.createElement("textarea")
+        textArea.value = currentUrl
+        textArea.style.position = "fixed"
+        textArea.style.left = "-999999px"
+        textArea.style.top = "-999999px"
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        document.execCommand("copy")
+        textArea.remove()
+      }
+
+      setCopySuccess(true)
+      setTimeout(() => setCopySuccess(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy URL:", err)
+      alert("Failed to copy URL to clipboard")
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
@@ -58,7 +92,6 @@ const EventDetail = () => {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
-
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-white/20 border-t-white mb-4"></div>
@@ -77,7 +110,6 @@ const EventDetail = () => {
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
-
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="text-6xl mb-4">🎫</div>
@@ -110,7 +142,6 @@ const EventDetail = () => {
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl animate-pulse delay-2000"></div>
       </div>
-
       <div className="relative z-10 min-h-screen py-12 px-4">
         <div className="max-w-4xl mx-auto">
           {/* Event Hero Card */}
@@ -134,8 +165,42 @@ const EventDetail = () => {
                   )}
                 </div>
               </div>
+              {/* Share Button - positioned in top right of header */}
+              <div className="absolute top-4 right-4">
+                <button
+                  onClick={handleShareEvent}
+                  className="flex items-center space-x-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 transition-all duration-300 group"
+                >
+                  {copySuccess ? (
+                    <>
+                      <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-green-400 font-medium text-sm">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5 text-white group-hover:text-purple-200 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                        />
+                      </svg>
+                      <span className="text-white group-hover:text-purple-200 font-medium text-sm transition-colors">
+                        Share
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
-
             {/* Event Content */}
             <div className="p-8">
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
@@ -144,9 +209,7 @@ const EventDetail = () => {
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-purple-200 bg-clip-text text-transparent mb-4 leading-tight">
                     {event.title}
                   </h1>
-
                   <p className="text-white/80 text-lg leading-relaxed mb-6">{event.description}</p>
-
                   {/* Event Info Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                     {/* Date & Time */}
@@ -166,7 +229,6 @@ const EventDetail = () => {
                         <p className="text-white/60 text-sm">{formattedTime}</p>
                       </div>
                     </div>
-
                     {/* Location */}
                     <div className="flex items-center space-x-3 p-4 bg-white/5 rounded-xl border border-white/10">
                       <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center">
@@ -190,9 +252,21 @@ const EventDetail = () => {
                         <p className="text-white/60 text-sm">{event.location}</p>
                       </div>
                     </div>
+                    <div className="text-center mb-4">
+                      <p className="text-white/80 text-sm mb-1">Tickets Sold</p>
+                      <div className="text-white font-bold text-lg">
+                        {ticketsSold} / {event.max_tickets}
+                      </div>
+                      {/* Optional Progress Bar */}
+                      <div className="w-full bg-white/10 rounded-full h-2 mt-2">
+                        <div
+                          className="bg-green-400 h-2 rounded-full"
+                          style={{ width: `${(ticketsSold / event.max_tickets) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
                 {/* Right Column - Ticket Purchase */}
                 <div className="lg:w-80">
                   <div className="backdrop-blur-xl bg-white/10 rounded-2xl border border-white/20 p-6 sticky top-8">
@@ -202,7 +276,6 @@ const EventDetail = () => {
                       </div>
                       <p className="text-white/60 text-sm">{event.price === 0 ? "No cost to attend" : "Per ticket"}</p>
                     </div>
-
                     {/* Ticket Features */}
                     <div className="space-y-3 mb-6">
                       <div className="flex items-center text-white/80 text-sm">
@@ -236,28 +309,32 @@ const EventDetail = () => {
                         Secure payment processing
                       </div>
                     </div>
-
                     {isUpcoming ? (
-                      <button
-                        onClick={handleBuyTicket}
-                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 flex items-center justify-center space-x-2"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                          />
-                        </svg>
-                        <span>{event.price === 0 ? "Get Free Ticket" : "Buy Ticket with Stripe"}</span>
-                      </button>
+                      ticketsSold < event.max_tickets ? (
+                        <button
+                          onClick={handleBuyTicket}
+                          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 flex items-center justify-center space-x-2"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                            />
+                          </svg>
+                          <span>{event.price === 0 ? "Get Free Ticket" : "Buy Ticket with Stripe"}</span>
+                        </button>
+                      ) : (
+                        <div className="w-full bg-gray-600/50 text-white/60 font-bold py-4 px-6 rounded-xl text-center cursor-not-allowed">
+                          Sold Out
+                        </div>
+                      )
                     ) : (
                       <div className="w-full bg-gray-600/50 text-white/60 font-bold py-4 px-6 rounded-xl text-center cursor-not-allowed">
                         Event Has Ended
                       </div>
                     )}
-
                     <div className="mt-4 text-center">
                       <p className="text-white/50 text-xs">Powered by Stripe • Secure checkout</p>
                     </div>
@@ -266,7 +343,6 @@ const EventDetail = () => {
               </div>
             </div>
           </div>
-
           {/* Additional Info Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Event Organizer */}
@@ -292,7 +368,6 @@ const EventDetail = () => {
                 </div>
               </div>
             </div>
-
             {/* Event Stats */}
             <div className="backdrop-blur-xl bg-white/10 rounded-2xl border border-white/20 p-6">
               <h3 className="text-xl font-bold text-white mb-4 flex items-center">

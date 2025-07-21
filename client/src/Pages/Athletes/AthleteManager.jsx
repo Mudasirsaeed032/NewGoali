@@ -11,6 +11,8 @@ const AthleteManager = () => {
   const [form, setForm] = useState({ full_name: "", position: "", age: "", jersey_number: "", user_id: null })
   const [editingId, setEditingId] = useState(null)
 
+
+
   useEffect(() => {
     const fetchInitial = async () => {
       const {
@@ -39,8 +41,8 @@ const AthleteManager = () => {
 
   const handleCreate = (user_id, full_name) => {
     setForm({ full_name, position: "", age: "", jersey_number: "", user_id })
-    setEditingId(null)
   }
+
 
   const handleEdit = (a) => {
     setForm({
@@ -67,7 +69,9 @@ const AthleteManager = () => {
       jersey_number: Number(form.jersey_number),
       team_id: teamId,
       created_by: userId,
+      user_id: form.user_id, // ✅ This is the fix
     }
+
     if (editingId) {
       await fetch(`http://localhost:5000/api/athletes/${editingId}`, {
         method: "PUT",

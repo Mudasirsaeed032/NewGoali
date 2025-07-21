@@ -1,7 +1,7 @@
 const supabase = require('../services/supabase')
 
 exports.createAthlete = async (req, res) => {
-  const { full_name, position, age, jersey_number, stats, team_id, created_by } = req.body
+  const { full_name, position, age, jersey_number, stats, team_id, created_by, user_id } = req.body
 
   if (!full_name || !team_id || !created_by) {
     return res.status(400).json({ error: 'Missing required fields' })
@@ -9,7 +9,7 @@ exports.createAthlete = async (req, res) => {
 
   const { error } = await supabase
     .from('athletes')
-    .insert([{ full_name, position, age, jersey_number, stats, team_id, created_by }])
+    .insert([{ full_name, position, age, jersey_number, stats, team_id, created_by, user_id }])
 
   if (error) return res.status(500).json({ error: 'Failed to create athlete', detail: error.message })
 
