@@ -4,18 +4,14 @@ const router = express.Router()
 const {
   createEvent,
   getEvents,
-  updateEventStatus
+  updateEventStatus,
+  getAllEvents
 } = require('../controllers/eventController')
 
 router.post('/', createEvent)
 router.get('/', getEvents)
 router.patch('/:id/status', updateEventStatus)
-// routes/events.js
-router.get('/all', async (req, res) => {
-  const { data, error } = await supabase.from('events').select('*')
-  if (error) return res.status(500).json({ error: 'Failed to fetch events' })
-  res.json({ events: data })
-})
+router.get('/all', getAllEvents);
 
 
 module.exports = router

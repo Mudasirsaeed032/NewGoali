@@ -106,3 +106,22 @@ exports.updateEventStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update event status', detail: err.message })
   }
 }
+
+// List ALL Events (Master Admin)
+exports.getAllEvents = async (req, res) => {
+  const { status } = req.query
+
+  try {
+    let query = supabase.from('events').select('*')
+
+    if (status) query = query.eq('status', status)
+
+    const { data, error } = await query.order('date', { ascending: true })
+
+    if (error) throw error
+
+    res.json({ events: data })
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch all events', detail: err.message })
+  }
+}

@@ -30,8 +30,9 @@ const AdminEventList = () => {
       } = await supabase.auth.getUser()
       if (!user) return
 
-      let url = `http://localhost:5000/api/master-admin/events`
+      let url = `http://localhost:5000/api/events/all`
       if (filter !== "all") url += `?status=${filter}`
+      console.log("Fetching from URL:", url)
 
       const res = await fetch(url)
       const json = await res.json()
@@ -41,6 +42,7 @@ const AdminEventList = () => {
 
     fetchEvents()
   }, [filter])
+
 
   useEffect(() => {
     const fetchTicketCounts = async () => {

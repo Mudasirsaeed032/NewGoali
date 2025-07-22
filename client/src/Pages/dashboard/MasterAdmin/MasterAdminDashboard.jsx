@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import UserTable from "../Admin/UserTable"
 import InviteTable from "../Admin/InviteTable"
-import AdminEventList from "../Admin/AdminEventList"
+import MasterAdminEventList from './MasterAdminEventList';
 import AdminFundraiserList from "../Admin/AdminFundraiserList"
 import AdminPaymentsTable from "../Admin/AdminPaymentstTable"
 import { Link } from "react-router-dom"
@@ -384,7 +384,7 @@ const MasterAdminDashboard = () => {
                 </div>
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                   <div className="p-6">
-                    <AdminEventList />
+                    <MasterAdminEventList />
                   </div>
                 </div>
               </motion.div>
