@@ -35,16 +35,24 @@ function Header({
           .single()
 
         if (!error && userDetails) {
-          setUser({ ...user, role: userDetails.role })  // Combine auth user + role
+          setUser({ ...user, role: userDetails.role })
+        } else {
+          setUser(user) // fallback
         }
       }
     }
 
+
     fetchUser()
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user || null)
+      if (session?.user) {
+        fetchUser()  // fetch full user details with role
+      } else {
+        setUser(null)
+      }
     })
+
 
     return () => {
       authListener.subscription.unsubscribe()
@@ -130,15 +138,19 @@ function Header({
                 <Link to="/my-tickets" className="text-black hover:text-gray-900 transition-colors font-body">
                   My Tickets
                 </Link>
-                  
-                <Link
-                  to="/dashboard/athletes"
-                  className="text-black hover:text-gray-900 transition-colors font-body"
-                >
-                  Manage Athletes
-                </Link>
+                {user?.role === 'admin' || user?.role === 'coach' &&(
+                  <Link
+                    to="/dashboard/athletes"
+                    className="text-black hover:text-gray-900 transition-colors font-body"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Manage Athletes
+                  </Link>
+                )}
+
               </>
             )}
+
           </div>
 
           {/* User Menu or Auth Buttons */}
@@ -223,7 +235,7 @@ function Header({
                     My Tickets
                   </Link>
                   <Link
-                    to="/manage/athlete"
+                    to="/dashboard/athletes"
                     className="text-gray-600 hover:text-gray-900 transition-colors font-body"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
