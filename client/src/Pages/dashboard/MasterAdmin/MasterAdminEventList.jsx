@@ -26,14 +26,12 @@ const AdminEventList = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       const {
-        data: { user },
+        data: { user }
       } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: profile } = await supabase.from("users").select("team_id").eq("id", user.id).single()
-
-      let url = `http://localhost:5000/api/events?team_id=${profile.team_id}`
-      if (filter !== "all") url += `&status=${filter}`
+      let url = `http://localhost:5000/api/master-admin/events`
+      if (filter !== "all") url += `?status=${filter}`
 
       const res = await fetch(url)
       const json = await res.json()
@@ -57,12 +55,12 @@ const AdminEventList = () => {
       setTicketCounts(counts)
     }
 
-    if (events?.length > 0) fetchTicketCounts()
+    if (events.length > 0) fetchTicketCounts()
   }, [events])
 
   const handleStatusChange = async (eventId, newStatus) => {
     const {
-      data: { user },
+      data: { user }
     } = await supabase.auth.getUser()
     if (!user) return
 
@@ -73,7 +71,7 @@ const AdminEventList = () => {
     })
 
     if (res.ok) {
-      setEvents((prev) => prev.map((ev) => (ev.id === eventId ? { ...ev, status: newStatus } : ev)))
+      setEvents(prev => prev.map(ev => ev.id === eventId ? { ...ev, status: newStatus } : ev))
     } else {
       alert("Failed to update status")
     }
@@ -81,27 +79,19 @@ const AdminEventList = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "published":
-        return <CheckCircle className="h-4 w-4" />
-      case "pending":
-        return <Clock className="h-4 w-4" />
-      case "closed":
-        return <XCircle className="h-4 w-4" />
-      default:
-        return <AlertCircle className="h-4 w-4" />
+      case "published": return <CheckCircle className="h-4 w-4" />
+      case "pending": return <Clock className="h-4 w-4" />
+      case "closed": return <XCircle className="h-4 w-4" />
+      default: return <AlertCircle className="h-4 w-4" />
     }
   }
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "published":
-        return "bg-green-100 text-green-800 border-green-200"
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200"
-      case "closed":
-        return "bg-gray-100 text-gray-800 border-gray-200"
-      default:
-        return "bg-blue-100 text-blue-800 border-blue-200"
+      case "published": return "bg-green-100 text-green-800 border-green-200"
+      case "pending": return "bg-yellow-100 text-yellow-800 border-yellow-200"
+      case "closed": return "bg-gray-100 text-gray-800 border-gray-200"
+      default: return "bg-blue-100 text-blue-800 border-blue-200"
     }
   }
 
