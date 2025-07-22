@@ -9,6 +9,8 @@ const DashboardRedirect = () => {
   const { role } = useParams()
 
   switch (role) {
+    case 'master_admin':
+      return <MasterAdminDashboard />
     case 'admin':
       return <AdminDashboard />
     case 'coach':
