@@ -3,6 +3,7 @@ import AdminDashboard from '../dashboard/Admin/AdminDashboard'
 import CoachDashboard from '../dashboard/Coach/CoachDashboard'
 import ParentDashboard from '../dashboard/ParentDashboard'
 import AthleteDashboard from '../dashboard/AthleteDashboard'
+import MasterAdminDashboard from '../dashboard/MasterAdmin/MasterAdminDashboard'
 
 const DashboardRedirect = () => {
   const { role } = useParams()
