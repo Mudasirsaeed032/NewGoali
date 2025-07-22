@@ -872,7 +872,7 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/athletes"
+          path="/manage/athletes"
           element={
             <Layout>
               <ProtectedRoute>

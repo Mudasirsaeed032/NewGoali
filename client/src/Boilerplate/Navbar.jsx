@@ -26,7 +26,18 @@ function Header({
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      setUser(user)
+
+      if (user) {
+        const { data: userDetails, error } = await supabase
+          .from('users')
+          .select('role')
+          .eq('id', user.id)
+          .single()
+
+        if (!error && userDetails) {
+          setUser({ ...user, role: userDetails.role })  // Combine auth user + role
+        }
+      }
     }
 
     fetchUser()
@@ -119,6 +130,7 @@ function Header({
                 <Link to="/my-tickets" className="text-black hover:text-gray-900 transition-colors font-body">
                   My Tickets
                 </Link>
+                  
                 <Link
                   to="/dashboard/athletes"
                   className="text-black hover:text-gray-900 transition-colors font-body"
@@ -211,7 +223,7 @@ function Header({
                     My Tickets
                   </Link>
                   <Link
-                    to="/dashboard/athletes"
+                    to="/manage/athlete"
                     className="text-gray-600 hover:text-gray-900 transition-colors font-body"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
