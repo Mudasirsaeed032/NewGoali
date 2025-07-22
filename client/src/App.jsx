@@ -41,6 +41,7 @@ import PublicEventList from "./Pages/Events/PublicEventList"
 import CoachFundraiserDonations from "./Pages/dashboard/Coach/CoachFundraiserDonations"
 import CoachTeamMembers from "./Pages/dashboard/Coach/CoachTeamMembers"
 import CoachFundraiserManager from "./Pages/dashboard/Coach/CoachFundraiserManager"
+import SignupMasterAdmin from "./Pages/Authentication/SignupMasterAdmin"
 
 function LandingPage() {
   const navigate = useNavigate()
@@ -924,6 +925,14 @@ function App() {
               <ProtectedRoute>
                 <CoachFundraiserManager />
               </ProtectedRoute>
+            </Layout>
+          }
+        />
+        <Route
+          path="/signup-master-admin"
+          element={
+            <Layout>
+              <SignupMasterAdmin />
             </Layout>
           }
         />

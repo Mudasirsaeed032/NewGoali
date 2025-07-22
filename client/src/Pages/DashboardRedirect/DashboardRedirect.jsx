@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom'
-import MasterAdminDashboard from '../dashboard/MasterAdmin/MasterAdminDashboard'
+import AdminDashboard from '../dashboard/Admin/AdminDashboard'
 import CoachDashboard from '../dashboard/Coach/CoachDashboard'
 import ParentDashboard from '../dashboard/ParentDashboard'
 import AthleteDashboard from '../dashboard/AthleteDashboard'
@@ -8,8 +8,8 @@ const DashboardRedirect = () => {
   const { role } = useParams()
 
   switch (role) {
-    case 'master_admin':
-      return <MasterAdminDashboard />
+    case 'admin':
+      return <AdminDashboard />
     case 'coach':
       return <CoachDashboard />
     case 'parent':
