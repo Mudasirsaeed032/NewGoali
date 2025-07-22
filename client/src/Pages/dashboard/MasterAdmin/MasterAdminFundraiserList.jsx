@@ -6,31 +6,29 @@ import { supabase } from "../../../supabaseClient"
 import { Link } from "react-router-dom"
 import { Heart, DollarSign, Target, CheckCircle, Clock, XCircle, Eye, Filter, AlertCircle, Plus } from "lucide-react"
 
-const AdminFundraiserList = () => {
+const MasterAdminFundraiserList = () => {
   const [fundraisers, setFundraisers] = useState([])
   const [filter, setFilter] = useState("all")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchFundraisers = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: profile } = await supabase.from("users").select("team_id").eq("id", user.id).single()
-
-      let url = `http://localhost:5000/api/fundraisers?team_id=${profile.team_id}`
-      if (filter !== "all") url += `&status=${filter}`
+      console.log("Fetching fundraisers with filter:", filter)
+      let url = `http://localhost:5000/api/fundraisers/all`
+      if (filter !== "all") url += `?status=${filter}`
 
       const res = await fetch(url)
       const json = await res.json()
+
+      console.log("Response from API:", json)
       setFundraisers(json.fundraisers || [])
       setLoading(false)
     }
 
     fetchFundraisers()
   }, [filter])
+
+
 
   const handleStatusChange = async (id, newStatus) => {
     const {
@@ -355,10 +353,10 @@ const AdminFundraiserList = () => {
                 <div className="text-2xl font-title text-blue-900">
                   {fundraisers.length > 0
                     ? Math.round(
-                        (fundraisers.reduce((sum, f) => sum + (f.collected_amount || 0), 0) /
-                          fundraisers.reduce((sum, f) => sum + (f.goal_amount || 0), 0)) *
-                          100,
-                      ) || 0
+                      (fundraisers.reduce((sum, f) => sum + (f.collected_amount || 0), 0) /
+                        fundraisers.reduce((sum, f) => sum + (f.goal_amount || 0), 0)) *
+                      100,
+                    ) || 0
                     : 0}
                   %
                 </div>
@@ -372,4 +370,4 @@ const AdminFundraiserList = () => {
   )
 }
 
-export default AdminFundraiserList
+export default MasterAdminFundraiserList

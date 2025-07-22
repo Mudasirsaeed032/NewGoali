@@ -4,18 +4,31 @@ const router = express.Router()
 const {
   createFundraiser,
   getFundraisers,
-  updateFundraiserStatus
+  updateFundraiserStatus,
+  getAllFundraisers
 } = require('../controllers/fundraiserController')
 
 router.post('/', createFundraiser)
 router.get('/', getFundraisers)
 router.patch('/:id/status', updateFundraiserStatus)
-// routes/fundraisers.js
+// GET all fundraisers (for master admin)
 router.get('/all', async (req, res) => {
-  const { data, error } = await supabase.from('fundraisers').select('*')
-  if (error) return res.status(500).json({ error: 'Failed to fetch fundraisers' })
-  res.json({ fundraisers: data })
+  const { status } = req.query
+
+  try {
+    let query = supabase.from('fundraisers').select('*')
+    if (status) query = query.eq('status', status)
+
+    const { data, error } = await query.order('created_at', { ascending: false })
+    if (error) throw error
+
+    res.json({ fundraisers: data })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch fundraisers', detail: err.message })
+  }
 })
+
 
 
 module.exports = router

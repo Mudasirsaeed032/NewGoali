@@ -5,7 +5,8 @@ const {
     getAllUsers,
     getAllInvites,
     getAllPayments,
-    getAllLogs
+    getAllLogs,
+    getAllFundraisers
 } = require('../controllers/masterAdminController');
 
 router.get('/metrics', getGlobalMetrics);

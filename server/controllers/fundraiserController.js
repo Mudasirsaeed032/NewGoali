@@ -113,3 +113,21 @@ exports.updateFundraiser = async (req, res) => {
 
   res.json({ message: 'Fundraiser updated successfully' })
 }
+
+// GET all fundraisers (for master admin)
+exports.getAllFundraisers = async (req, res) => {
+  const { status } = req.query
+
+  try {
+    let query = supabase.from('fundraisers').select('*')
+    if (status) query = query.eq('status', status)
+
+    const { data, error } = await query.order('created_at', { ascending: false })
+    if (error) throw error
+
+    res.json({ fundraisers: data })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Failed to fetch fundraisers', detail: err.message })
+  }
+}

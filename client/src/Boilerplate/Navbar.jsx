@@ -138,7 +138,7 @@ function Header({
                 <Link to="/my-tickets" className="text-black hover:text-gray-900 transition-colors font-body">
                   My Tickets
                 </Link>
-                {(user?.role === 'admin' || user?.role === 'coach') &&(
+                {(user?.role === 'admin' || user?.role === 'coach' || user?.role === 'master_admin') &&(
                   <Link
                     to="/dashboard/athletes"
                     className="text-black hover:text-gray-900 transition-colors font-body"

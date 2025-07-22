@@ -52,7 +52,6 @@ exports.getGlobalMetrics = async (req, res) => {
         // Placeholder
         const collectionRate = 75
 
-        console.log(res.json.activeCampaigns);
         return res.json({
             totalRevenue,
             activeCampaigns,
@@ -130,3 +129,4 @@ exports.getAllLogs = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch activity feed', detail: err.message })
     }
 }
+

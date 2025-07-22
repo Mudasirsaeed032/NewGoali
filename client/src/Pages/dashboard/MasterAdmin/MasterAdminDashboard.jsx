@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import UserTable from "../Admin/UserTable"
-import InviteTable from "../Admin/InviteTable"
+import MasterInviteTable from './MasterInviteTable';
 import MasterAdminEventList from './MasterAdminEventList';
-import AdminFundraiserList from "../Admin/AdminFundraiserList"
-import AdminPaymentsTable from "../Admin/AdminPaymentstTable"
+import MasterAdminFundraiserList from "./MasterAdminFundraiserList"
+import MasterAdminPaymentsTable from './MasterAdminPaymentstTable'
 import { Link } from "react-router-dom"
 import {
   BarChart3,
@@ -137,22 +137,6 @@ const MasterAdminDashboard = () => {
           <div>
             <h1 className="text-3xl font-title text-gray-900 mb-2">Master Admin Dashboard</h1>
             <p className="text-gray-600 font-body">Complete oversight of all teams and activities</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link
-              to="/events/create"
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-lg font-header flex items-center space-x-2 hover:shadow-lg transition-all duration-200 no-underline"
-            >
-              <Plus className="h-4 w-4 text-white" />
-              <span className="text-white">Create Event</span>
-            </Link>
-            <Link
-              to="/fundraisers/create"
-              className="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-2 rounded-lg font-header flex items-center space-x-2 hover:shadow-lg transition-all duration-200 no-underline"
-            >
-              <Heart className="h-4 w-4 text-white" />
-              <span className="text-white">Create Fundraiser</span>
-            </Link>
           </div>
         </div>
       </motion.div>
@@ -355,7 +339,7 @@ const MasterAdminDashboard = () => {
                     <h3 className="text-lg font-header text-gray-900">System Invitations ({invites.length})</h3>
                   </div>
                   <div className="p-6">
-                    <InviteTable invites={invites} />
+                    <MasterInviteTable invites={invites} />
                   </div>
                 </div>
               </motion.div>
@@ -413,7 +397,7 @@ const MasterAdminDashboard = () => {
                 </div>
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
                   <div className="p-6">
-                    <AdminFundraiserList />
+                    <MasterAdminFundraiserList />
                   </div>
                 </div>
               </motion.div>
@@ -437,7 +421,7 @@ const MasterAdminDashboard = () => {
                     <h3 className="text-lg font-header text-gray-900">All Payments</h3>
                   </div>
                   <div className="p-6">
-                    <AdminPaymentsTable payments={payments} />
+                    <MasterAdminPaymentsTable payments={payments} />
                   </div>
                 </div>
               </motion.div>
