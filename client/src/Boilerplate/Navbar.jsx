@@ -1,9 +1,8 @@
 "use client"
-
-import React, { useState, useEffect } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { Link, useNavigate, useLocation } from "react-router-dom"
-import { Trophy, ArrowLeft, Bell, User, Menu, X } from "lucide-react"
+import { Trophy, ArrowLeft, Bell, User, Menu, X, ChevronDown, ChevronUp } from "lucide-react"
 import { supabase } from "../supabaseClient"
 
 function Header({
@@ -20,20 +19,15 @@ function Header({
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-
       if (user) {
-        const { data: userDetails, error } = await supabase
-          .from('users')
-          .select('role')
-          .eq('id', user.id)
-          .single()
-
+        const { data: userDetails, error } = await supabase.from("users").select("role").eq("id", user.id).single()
         if (!error && userDetails) {
           setUser({ ...user, role: userDetails.role })
         } else {
@@ -41,18 +35,14 @@ function Header({
         }
       }
     }
-
-
     fetchUser()
-
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
-        fetchUser()  // fetch full user details with role
+        fetchUser() // fetch full user details with role
       } else {
         setUser(null)
       }
     })
-
 
     return () => {
       authListener.subscription.unsubscribe()
@@ -62,7 +52,6 @@ function Header({
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-
       // Show header when scrolling up or at the top
       if (currentScrollY < lastScrollY || currentScrollY < 100) {
         setIsVisible(true)
@@ -71,17 +60,33 @@ function Header({
       else if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false)
       }
-
       setLastScrollY(currentScrollY)
     }
-
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [lastScrollY])
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isDropdownOpen && !event.target.closest(".dropdown-container")) {
+        setIsDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [isDropdownOpen])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate("/login")
+  }
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen)
   }
 
   const headerClasses = isTransparent ? "bg-white/90 backdrop-blur-sm" : "bg-white/90 backdrop-blur-sm"
@@ -111,7 +116,6 @@ function Header({
                 <span className="font-body">Back to Home</span>
               </motion.button>
             )}
-
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -120,7 +124,6 @@ function Header({
               <span className="text-xl font-title text-gray-900">{title}</span>
             </Link>
           </div>
-
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/dashboard/:role" className="text-black hover:text-gray-900 transition-colors font-body">
@@ -133,12 +136,13 @@ function Header({
               Event
             </Link>
 
+
             {user && (
               <>
                 <Link to="/my-tickets" className="text-black hover:text-gray-900 transition-colors font-body">
                   My Tickets
                 </Link>
-                {(user?.role === 'admin' || user?.role === 'coach' || user?.role === 'master_admin') &&(
+                {(user?.role === "admin" || user?.role === "coach" || user?.role === "master_admin") && (
                   <Link
                     to="/dashboard/athletes"
                     className="text-black hover:text-gray-900 transition-colors font-body"
@@ -147,12 +151,51 @@ function Header({
                     Manage Athletes
                   </Link>
                 )}
-
               </>
             )}
+            {/* New Dropdown Menu */}
+            <div className="relative dropdown-container">
+              <button
+                onClick={toggleDropdown}
+                className="flex items-center space-x-1 text-black hover:text-gray-900 transition-colors font-body"
+              >
+                <span>Resources</span>
+                {isDropdownOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
 
+              {isDropdownOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-100"
+                >
+                  <Link
+                    to="/privacy-policy"
+                    className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors font-body"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    Privacy Policy
+                  </Link>
+                  <Link
+                    to="/payments"
+                    className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors font-body"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    Payments
+                  </Link>
+                  <Link
+                    to="/terms"
+                    className="block px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors font-body"
+                    onClick={() => setIsDropdownOpen(false)}
+                  >
+                    Terms
+                  </Link>
+                </motion.div>
+              )}
+            </div>  
           </div>
-
           {/* User Menu or Auth Buttons */}
           <div className="flex items-center space-x-4">
             {user ? (
@@ -183,7 +226,6 @@ function Header({
                 </Link>
               </div>
             )}
-
             {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -193,7 +235,6 @@ function Header({
             </button>
           </div>
         </div>
-
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <motion.div
@@ -224,6 +265,48 @@ function Header({
               >
                 Event
               </Link>
+
+              {/* Mobile Resources Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center justify-between w-full text-gray-600 hover:text-gray-900 transition-colors font-body"
+                >
+                  <span>Resources</span>
+                  {isDropdownOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                </button>
+
+                {isDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="pl-4 mt-2 space-y-2"
+                  >
+                    <Link
+                      to="/privacy-policy"
+                      className="block py-1 text-gray-600 hover:text-gray-900 transition-colors font-body"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Privacy Policy
+                    </Link>
+                    <Link
+                      to="/payments"
+                      className="block py-1 text-gray-600 hover:text-gray-900 transition-colors font-body"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Payments
+                    </Link>
+                    <Link
+                      to="/terms"
+                      className="block py-1 text-gray-600 hover:text-gray-900 transition-colors font-body"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Terms
+                    </Link>
+                  </motion.div>
+                )}
+              </div>
 
               {user ? (
                 <>

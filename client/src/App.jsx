@@ -42,6 +42,9 @@ import CoachFundraiserDonations from "./Pages/dashboard/Coach/CoachFundraiserDon
 import CoachTeamMembers from "./Pages/dashboard/Coach/CoachTeamMembers"
 import CoachFundraiserManager from "./Pages/dashboard/Coach/CoachFundraiserManager"
 import SignupMasterAdmin from "./Pages/Authentication/SignupMasterAdmin"
+import Payments from "./Pages/NavDropdownPages/Payments"
+import PrivacyPolicy from "./Pages/NavDropdownPages/PrivacyPolicy"
+import Terms from "./Pages/NavDropdownPages/terms"
 
 function LandingPage() {
   const navigate = useNavigate()
@@ -491,9 +494,8 @@ function LandingPage() {
                 <motion.button
                   key={role.name}
                   onClick={() => setActiveRole(role.name)}
-                  className={`px-8 py-4 rounded-xl font-header transition-all duration-300 ${
-                    activeRole === role.name ? "bg-white text-white shadow-lg" : "text-white hover:bg-white/20"
-                  }`}
+                  className={`px-8 py-4 rounded-xl font-header transition-all duration-300 ${activeRole === role.name ? "bg-white text-gray-900 shadow-lg" : "text-white hover:bg-white/20 hover:text-white-900"
+                    }`}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   layout
@@ -753,7 +755,7 @@ function LandingPage() {
             </motion.button>
             <motion.button
               onClick={() => navigate("/fundraisers")}
-              className="border-2 border-gray-200 hover:border-gray-300 text-white px-8 py-4 rounded-xl font-header text-lg transition-all duration-200 hover:bg-gray-50"
+              className="border-2 border-gray-200 hover:border-gray-300 text-black px-8 py-4 rounded-xl font-header text-lg transition-all duration-200 hover:bg-gray-50"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -933,6 +935,30 @@ function App() {
           element={
             <Layout>
               <SignupMasterAdmin />
+            </Layout>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <Layout>
+              <PrivacyPolicy />
+            </Layout>
+          }
+        />
+        <Route
+          path="/payments"
+          element={
+            <Layout>
+              <Payments />
+            </Layout>
+          }
+        />
+        <Route
+          path="/terms"
+          element={
+            <Layout>
+              <Terms />
             </Layout>
           }
         />

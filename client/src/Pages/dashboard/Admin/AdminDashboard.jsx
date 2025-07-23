@@ -38,6 +38,8 @@ const AdminDashboard = () => {
   const [payments, setPayments] = useState([])
   const [isStripeConnected, setIsStripeConnected] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
+  const [currentUser, setCurrentUser] = useState(null)
+
 
   // Toggle state for sections
   const [showUsers, setShowUsers] = useState(true)
@@ -65,7 +67,14 @@ const AdminDashboard = () => {
         const invitesData = await invitesRes.json()
         const paymentsData = await paymentsRes.json()
 
-        const { data: userRow } = await supabase.from("users").select("team_id").eq("id", user.id).single()
+        const { data: userRow } = await supabase
+          .from("users")
+          .select("team_id, organization_name")
+          .eq("id", user.id)
+          .single()
+
+        setCurrentUser(userRow)
+
 
         const { data: team } = await supabase
           .from("teams")
@@ -177,7 +186,7 @@ const AdminDashboard = () => {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-title text-gray-900 mb-2">Complete Management Portal</h1>
+            <h1 className="text-3xl font-title text-gray-900 mb-2">{currentUser?.organization_name || 'My Organization'}</h1>
             <p className="text-gray-600 font-body">Manage all aspects of your organization</p>
           </div>
 
@@ -231,11 +240,10 @@ const AdminDashboard = () => {
                   <motion.button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
-                      activeTab === tab.id
-                        ? "bg-blue-50 border-2 border-blue-200 text-blue-900"
-                        : "hover:bg-gray-50 border-2 border-transparent text-gray-700"
-                    }`}
+                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${activeTab === tab.id
+                      ? "bg-blue-50 border-2 border-blue-200 text-blue-900"
+                      : "hover:bg-gray-50 border-2 border-transparent text-gray-700"
+                      }`}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
