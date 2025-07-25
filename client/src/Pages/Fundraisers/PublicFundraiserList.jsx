@@ -268,24 +268,35 @@ const PublicFundraiserList = () => {
                     whileHover={{ y: -5, scale: 1.02 }}
                     className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
                   >
-                    {/* Card Header */}
-                    <div className="bg-gradient-to-r from-pink-500 to-rose-600 p-6 text-white">
+                    {/* Card Header with Image */}
+                    {fundraiser.image_url ? (
+                      <img
+                        src={fundraiser.image_url}
+                        alt={fundraiser.title}
+                        className="w-full h-48 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gradient-to-r from-pink-500 to-rose-600 flex items-center justify-center text-white">
+                        <Heart className="h-8 w-8" />
+                      </div>
+                    )}
+                    <div className="p-6 bg-white">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                          <Heart className="h-5 w-5 text-white" />
-                        </div>
                         <span
-                          className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-header border border-white/20 bg-white/10 text-white`}
+                          className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-header border ${getStatusColor(
+                            fundraiser.status
+                          )}`}
                         >
                           {getStatusIcon(fundraiser.status)}
                           <span className="capitalize">{fundraiser.status}</span>
                         </span>
                       </div>
-                      <h2 className="text-xl font-title text-white mb-2 line-clamp-2">{fundraiser.title}</h2>
-                      <p className="text-pink-100 font-body text-sm line-clamp-3">
+                      <h2 className="text-xl font-title text-gray-900 mb-2 line-clamp-2">{fundraiser.title}</h2>
+                      <p className="text-gray-600 font-body text-sm line-clamp-3">
                         {fundraiser.description || "Help us reach our fundraising goal"}
                       </p>
                     </div>
+
 
                     {/* Card Body */}
                     <div className="p-6">

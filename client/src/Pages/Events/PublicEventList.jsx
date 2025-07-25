@@ -189,26 +189,38 @@ const PublicEventList = () => {
                   key={event.id}
                   className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
                 >
-                  {/* Event Image Placeholder */}
-                  <div className="relative h-48 bg-gradient-to-br from-purple-400 to-blue-500 overflow-hidden">
-                    <div className="absolute inset-0 bg-black/20"></div>
+                  {/* Event Image or Placeholder */}
+                  <div className="relative h-48 overflow-hidden">
+                    {event.image_url ? (
+                      <img
+                        src={event.image_url}
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center">
+                        <Calendar className="w-16 h-16 text-white/50" />
+                      </div>
+                    )}
+
+                    {/* Date Overlay */}
                     <div className="absolute top-4 left-4">
                       <div className="bg-white/90 backdrop-blur-sm rounded-lg p-2 text-center min-w-[60px]">
-                        <div className="text-2xl font-bold text-gray-900">{dateInfo.day}</div>
-                        <div className="text-xs text-gray-600 uppercase">{dateInfo.month}</div>
+                        <div className="text-2xl font-bold text-gray-900">{formatDate(event.date).day}</div>
+                        <div className="text-xs text-gray-600 uppercase">{formatDate(event.date).month}</div>
                       </div>
                     </div>
+
+                    {/* Status Overlay */}
                     <div className="absolute top-4 right-4">
-                      {upcoming && (
+                      {isUpcoming(event.date) && (
                         <div className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
                           Upcoming
                         </div>
                       )}
                     </div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Calendar className="w-16 h-16 text-white/50" />
-                    </div>
                   </div>
+
 
                   {/* Event Content */}
                   <div className="p-6">
