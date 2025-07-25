@@ -1,5 +1,39 @@
 const supabase = require('../services/supabase')
 
+const cloudinary = require('../services/cloudinary'); // adjust path if needed
+
+exports.updateCoverImage = async (req, res) => {
+  const { user_id } = req.body;
+  const file = req.file; // multer populates this
+
+  if (!user_id || !file) {
+    return res.status(400).json({ error: 'Missing user_id or file' });
+  }
+
+  try {
+    // Upload to Cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: 'goali/admin-covers',
+    });
+
+    const imageUrl = result.secure_url;
+
+    // Update Supabase
+    const { error } = await supabase
+      .from('users')
+      .update({ cover_image: imageUrl })
+      .eq('id', user_id);
+
+    if (error) throw error;
+
+    res.json({ message: 'Cover image updated successfully', url: imageUrl });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to upload image', detail: err.message });
+  }
+};
+
+
+
 exports.getAdminMetrics = async (req, res) => {
   const user_id = req.query.user_id
 

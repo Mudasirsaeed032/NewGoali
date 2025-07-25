@@ -39,6 +39,7 @@ const AdminDashboard = () => {
   const [isStripeConnected, setIsStripeConnected] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
   const [currentUser, setCurrentUser] = useState(null)
+  const [uploadingCover, setUploadingCover] = useState(false);
 
 
   // Toggle state for sections
@@ -69,7 +70,7 @@ const AdminDashboard = () => {
 
         const { data: userRow } = await supabase
           .from("users")
-          .select("team_id, organization_name")
+          .select("team_id, organization_name, cover_image")
           .eq("id", user.id)
           .single()
 
@@ -83,7 +84,7 @@ const AdminDashboard = () => {
           .single()
 
         setIsStripeConnected(!!team?.stripe_connect_id)
-        console.log(team?.stripe_connect_id);
+        console.log(team?.stripe_connect_id)
         setMetrics(metricsData)
         setUsers(usersData.users)
         setInvites(invitesData.invites)
@@ -105,6 +106,39 @@ const AdminDashboard = () => {
     const { url } = await res.json()
     if (url) window.location.href = url
   }
+
+  const handleCoverImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingCover(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      const formData = new FormData();
+      formData.append("cover", file);
+      formData.append("user_id", user.id);
+
+      const res = await fetch("http://localhost:5000/api/admin/cover-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+
+      if (result.url) {
+        setCurrentUser((prev) => ({ ...prev, cover_image: result.url }));
+      } else {
+        alert(result.error || "Upload failed");
+      }
+    } catch (err) {
+      console.error("Cover upload error:", err);
+      alert("Upload failed");
+    } finally {
+      setUploadingCover(false);
+    }
+  };
 
   const navigationTabs = [
     { id: "overview", label: "Overview", icon: BarChart3, description: "Dashboard summary and key metrics" },
@@ -178,7 +212,28 @@ const AdminDashboard = () => {
           </div>
         </div>
       </motion.div>
+      {currentUser?.cover_image && (
+        <div className="w-full h-100 relative">
+          <img
+            src={currentUser.cover_image}
+            alt="Cover"
+            className="w-full h-full object-cover rounded-b-3xl shadow"
+          />
+          <label className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-2 rounded-lg shadow cursor-pointer text-sm font-medium text-gray-800 hover:bg-white transition">
+            ✏️ Change Cover
+            <input type="file" accept="image/*" hidden onChange={handleCoverImageUpload} />
+          </label>
+        </div>
+      )}
 
+      {!currentUser?.cover_image && (
+        <div className="w-full h-60 bg-gradient-to-r from-blue-200 to-purple-300 flex items-center justify-center relative rounded-b-3xl">
+          <label className="bg-white/90 px-4 py-2 rounded-lg shadow cursor-pointer text-sm font-medium text-gray-700 hover:bg-white transition">
+            ➕ Upload Cover Photo
+            <input type="file" accept="image/*" hidden onChange={handleCoverImageUpload} />
+          </label>
+        </div>
+      )}
       {/* Main Dashboard Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

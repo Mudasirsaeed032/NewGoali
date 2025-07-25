@@ -146,27 +146,40 @@ const EventDetail = () => {
         <div className="max-w-4xl mx-auto">
           {/* Event Hero Card */}
           <div className="backdrop-blur-xl bg-white/10 rounded-3xl border border-white/20 shadow-2xl overflow-hidden mb-8 hover:shadow-purple-500/25 transition-all duration-500 hover:scale-[1.02]">
-            {/* Event Header */}
-            <div className="relative h-64 bg-gradient-to-r from-purple-600/50 to-blue-600/50 flex items-center justify-center">
-              <div className="absolute inset-0 bg-black/20"></div>
-              <div className="relative z-10 text-center">
-                <div className="text-6xl mb-4">🎭</div>
+            {/* Event Header with Optional Image */}
+            <div className="relative h-64 overflow-hidden">
+              {event.image_url ? (
+                <img
+                  src={event.image_url}
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="h-full w-full bg-gradient-to-r from-purple-600/50 to-blue-600/50 flex items-center justify-center">
+                  <div className="text-6xl">🎭</div>
+                </div>
+              )}
+
+              <div className="absolute inset-0 bg-black/30" />
+
+              {/* Centered Tag */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
                 <div className="inline-flex items-center px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30">
                   {isUpcoming ? (
                     <>
-                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                      <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
                       <span className="text-white font-medium">Upcoming Event</span>
                     </>
                   ) : (
                     <>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full mr-2"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full mr-2" />
                       <span className="text-white/70 font-medium">Past Event</span>
                     </>
                   )}
                 </div>
               </div>
               {/* Share Button - positioned in top right of header */}
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 right-4 Z-20">
                 <button
                   onClick={handleShareEvent}
                   className="flex items-center space-x-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full border border-white/30 hover:bg-white/30 transition-all duration-300 group"
@@ -393,11 +406,10 @@ const EventDetail = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-white/70">Status</span>
                   <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      isUpcoming
+                    className={`px-2 py-1 rounded-full text-xs font-medium ${isUpcoming
                         ? "bg-green-500/20 text-green-400 border border-green-500/30"
                         : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
-                    }`}
+                      }`}
                   >
                     {isUpcoming ? "Active" : "Ended"}
                   </span>

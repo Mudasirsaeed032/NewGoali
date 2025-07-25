@@ -35,7 +35,7 @@ const FundraiserDetail = () => {
     const fetchFundraiser = async () => {
       try {
         const { data, error } = await supabase.from("fundraisers").select("*").eq("id", id).single()
-        
+
         if (error) throw error
         setFundraiser(data)
       } catch (err) {
@@ -201,20 +201,39 @@ const FundraiserDetail = () => {
               animate={{ opacity: 1, y: 0 }}
               className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
             >
-              {/* Header */}
-              <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-8 text-white">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                    <Heart className="h-7 w-7 text-white" />
+              {/* Fundraiser Image or Gradient */}
+              <div className="relative h-64 overflow-hidden">
+                {fundraiser.image_url ? (
+                  <img
+                    src={fundraiser.image_url}
+                    alt={fundraiser.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-gradient-to-r from-pink-600 to-rose-600 flex items-center justify-center text-white text-6xl">
+                    ❤️
                   </div>
+                )}
+                <div className="absolute inset-0 bg-black/30" />
+                <div className="absolute top-4 right-4 z-10">
                   <span className="inline-flex items-center space-x-1 px-3 py-1 rounded-full text-sm font-header border border-white/20 bg-white/10 text-white">
                     <CheckCircle className="h-4 w-4" />
                     <span className="capitalize">{fundraiser.status || "Active"}</span>
                   </span>
                 </div>
-                <h1 className="text-3xl lg:text-4xl font-title text-white mb-4">{fundraiser.title}</h1>
-                <p className="text-pink-100 font-body text-lg leading-relaxed">{fundraiser.description}</p>
               </div>
+
+              {/* Title and Description */}
+              <div className="p-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center">
+                    <Heart className="h-7 w-7 text-pink-600" />
+                  </div>
+                </div>
+                <h1 className="text-3xl lg:text-4xl font-title text-gray-900 mb-4">{fundraiser.title}</h1>
+                <p className="text-gray-700 font-body text-lg leading-relaxed">{fundraiser.description}</p>
+              </div>
+
 
               {/* Progress Section */}
               <div className="p-8">
@@ -289,43 +308,7 @@ const FundraiserDetail = () => {
               </div>
             </motion.div>
 
-            {/* Recent Donations */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8"
-            >
-              <h3 className="text-lg font-header text-gray-900 mb-6">Recent Supporters</h3>
-              <div className="space-y-4">
-                {[
-                  { name: "Sarah M.", amount: 100, time: "2 hours ago", message: "Great cause! Go team!" },
-                  { name: "Mike R.", amount: 50, time: "5 hours ago", message: "Happy to support!" },
-                  { name: "Anonymous", amount: 25, time: "1 day ago", message: "" },
-                  { name: "Lisa K.", amount: 75, time: "2 days ago", message: "Keep up the great work!" },
-                ].map((donation, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                    className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl"
-                  >
-                    <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-rose-600 rounded-full flex items-center justify-center">
-                      <span className="text-white font-header text-sm">{donation.name.charAt(0).toUpperCase()}</span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-header text-gray-900">{donation.name}</span>
-                        <span className="font-header text-green-600">${donation.amount}</span>
-                      </div>
-                      {donation.message && <p className="text-sm text-gray-600 font-body mt-1">"{donation.message}"</p>}
-                      <p className="text-xs text-gray-500 font-body mt-1">{donation.time}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+
           </div>
 
           {/* Donation Sidebar */}
@@ -386,11 +369,10 @@ const FundraiserDetail = () => {
                     <motion.button
                       key={quickAmount}
                       onClick={() => setAmount(quickAmount.toString())}
-                      className={`p-3 rounded-xl border-2 transition-all duration-200 font-header ${
-                        amount === quickAmount.toString()
+                      className={`p-3 rounded-xl border-2 transition-all duration-200 font-header ${amount === quickAmount.toString()
                           ? "border-pink-500 bg-pink-50 text-pink-700"
                           : "border-gray-200 hover:border-gray-300 text-gray-700"
-                      }`}
+                        }`}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -427,11 +409,10 @@ const FundraiserDetail = () => {
               <motion.button
                 onClick={handleDonate}
                 disabled={donating || !amount || Number.parseFloat(amount) <= 0}
-                className={`w-full py-4 rounded-xl font-header text-lg transition-all duration-200 ${
-                  donating || !amount || Number.parseFloat(amount) <= 0
+                className={`w-full py-4 rounded-xl font-header text-lg transition-all duration-200 ${donating || !amount || Number.parseFloat(amount) <= 0
                     ? "bg-gray-400 text-white cursor-not-allowed"
                     : "bg-gradient-to-r from-pink-600 to-rose-600 text-white hover:shadow-lg hover:scale-[1.02]"
-                }`}
+                  }`}
                 whileHover={!donating && amount && Number.parseFloat(amount) > 0 ? { scale: 1.02 } : {}}
                 whileTap={!donating && amount && Number.parseFloat(amount) > 0 ? { scale: 0.98 } : {}}
               >
