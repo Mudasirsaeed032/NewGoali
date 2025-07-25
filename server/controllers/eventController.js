@@ -1,4 +1,6 @@
 const supabase = require('../services/supabase')
+const cloudinary = require('../services/cloudinary')
+const fs = require('fs')
 
 // Create Event (Admin or Coach)
 exports.createEvent = async (req, res) => {
@@ -22,6 +24,16 @@ exports.createEvent = async (req, res) => {
 
     const status = role === 'admin' ? 'published' : 'pending'
 
+    let image_url = null;
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'events',
+      });
+      image_url = uploadResult.secure_url;
+      fs.unlinkSync(req.file.path);
+    }
+
+
     const { data: event, error } = await supabase
       .from('events')
       .insert({
@@ -33,7 +45,8 @@ exports.createEvent = async (req, res) => {
         max_tickets,
         created_by,
         team_id,
-        status
+        status,
+        image_url
       })
       .select()
       .single()

@@ -1,4 +1,6 @@
 const express = require('express')
+const multer = require('multer')
+const upload = multer({dest: 'uploads/'})
 const supabase = require('../services/supabase')
 const router = express.Router()
 const {
@@ -8,7 +10,7 @@ const {
   getAllEvents
 } = require('../controllers/eventController')
 
-router.post('/', createEvent)
+router.post('/', upload.single('image'), createEvent)
 router.get('/', getEvents)
 router.patch('/:id/status', updateEventStatus)
 router.get('/all', getAllEvents);

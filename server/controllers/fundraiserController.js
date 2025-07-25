@@ -1,5 +1,6 @@
 const supabase = require('../services/supabase')
-
+const cloudinary = require('../services/cloudinary')
+const fs = require('fs');
 // Create Fundraiser (Coach or Admin)
 exports.createFundraiser = async (req, res) => {
   const { title, description, goal_amount, owner_id } = req.body
@@ -19,6 +20,15 @@ exports.createFundraiser = async (req, res) => {
 
     const status = user.role === 'admin' ? 'published' : 'pending'
 
+    let image_url = null;
+    if (req.file) {
+      const uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'fundraisers',
+      });
+      image_url = uploadResult.secure_url;
+      fs.unlinkSync(req.file.path); // delete temp file
+    }
+
     const { data: fundraiser, error } = await supabase
       .from('fundraisers')
       .insert({
@@ -28,7 +38,8 @@ exports.createFundraiser = async (req, res) => {
         collected_amount: 0,
         team_id: user.team_id,
         owner_id,
-        status
+        status,
+        image_url
       })
       .select()
       .single()

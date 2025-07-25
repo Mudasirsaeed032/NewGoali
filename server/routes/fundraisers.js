@@ -1,4 +1,7 @@
 const express = require('express')
+const multer = require('multer')
+
+
 const supabase = require('../services/supabase')
 const router = express.Router()
 const {
@@ -7,8 +10,9 @@ const {
   updateFundraiserStatus,
   getAllFundraisers
 } = require('../controllers/fundraiserController')
+const upload = multer({dest: 'uploads/'});
 
-router.post('/', createFundraiser)
+router.post('/', upload.single('image'), createFundraiser)
 router.get('/', getFundraisers)
 router.patch('/:id/status', updateFundraiserStatus)
 // GET all fundraisers (for master admin)
