@@ -12,6 +12,7 @@ const CreateEvent = () => {
     location: "",
     price: "",
     max_tickets: "",
+    image: null
   })
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -50,30 +51,46 @@ const CreateEvent = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!user) return alert("Not logged in")
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!user) return alert("Not logged in");
+    if (!validateForm()) return;
 
-    setLoading(true)
+    setLoading(true);
+
     try {
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("description", form.description);
+      formData.append("location", form.location);
+      formData.append("date", form.date);
+      formData.append("price", parseFloat(form.price || 0));
+      formData.append("max_tickets", parseInt(form.max_tickets || 0));
+      formData.append("created_by", user.id);
+
+      if (form.image) {
+        formData.append("image", form.image);
+      }
+
       const res = await fetch("http://localhost:5000/api/events", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, created_by: user.id }),
-      })
-      const data = await res.json()
+        body: formData,
+      });
+
+      const data = await res.json();
+
       if (res.ok) {
-        alert("Event created successfully")
-        navigate("/dashboard/" + user.role)
+        alert("Event created successfully");
+        navigate("/dashboard/" + user.role);
       } else {
-        alert(data.error || "Failed to create event")
+        alert(data.error || "Failed to create event");
       }
     } catch (error) {
-      alert("Network error. Please try again.")
+      alert("Network error. Please try again.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
@@ -210,6 +227,24 @@ const CreateEvent = () => {
                   {errors.location && <p className="text-red-400 text-sm">{errors.location}</p>}
                 </div>
               </div>
+
+              {/* Image Upload Field */}
+              <div>
+                <label className="block text-sm font-semibold text-white mb-2">
+                  Fundraiser Image (optional)
+                </label>
+                <input
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+                  className="w-full px-4 py-2 border text-white rounded-xl border-gray-300"
+                />
+                {form.image && (
+                  <p className="mt-1 text-xs text-white">Selected: {form.image.name}</p>
+                )}
+              </div>
+
 
               {/* Pricing Section */}
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10">

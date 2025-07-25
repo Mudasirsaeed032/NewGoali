@@ -9,6 +9,7 @@ const CreateFundraiser = () => {
     title: "",
     description: "",
     goal_amount: "",
+    image: null
   })
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -61,43 +62,46 @@ const CreateFundraiser = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    if (!validateForm()) return
+    e.preventDefault();
+    if (!validateForm()) return;
     if (!user) {
-      alert("Please log in to create a fundraiser")
-      return
+      alert("Please log in to create a fundraiser");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("description", form.description);
+      formData.append("goal_amount", parseFloat(form.goal_amount));
+      formData.append("owner_id", user.id);
+      if (form.image) {
+        formData.append("image", form.image);
+      }
+
       const res = await fetch("http://localhost:5000/api/fundraisers", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          goal_amount: Number.parseFloat(form.goal_amount),
-          owner_id: user.id,
-        }),
-      })
+        body: formData,
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (res.ok) {
-        // Success animation/feedback could go here
         navigate(`/dashboard/${user.role}`, {
           state: { message: "Fundraiser created successfully!" },
-        })
+        });
       } else {
-        throw new Error(data.error || "Failed to create fundraiser")
+        throw new Error(data.error || "Failed to create fundraiser");
       }
     } catch (error) {
-      alert(error.message)
+      alert(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
 
   const suggestedGoals = [500, 1000, 2500, 5000, 10000]
 
@@ -128,9 +132,8 @@ const CreateFundraiser = () => {
                   placeholder="Give your fundraiser a compelling title"
                   value={form.title}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 ${
-                    errors.title ? "border-red-300 bg-red-50" : "border-gray-300"
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 ${errors.title ? "border-red-300 bg-red-50" : "border-gray-300"
+                    }`}
                   maxLength={100}
                 />
                 {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
@@ -146,9 +149,8 @@ const CreateFundraiser = () => {
                   value={form.description}
                   onChange={handleChange}
                   rows={6}
-                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 resize-none ${
-                    errors.description ? "border-red-300 bg-red-50" : "border-gray-300"
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 resize-none ${errors.description ? "border-red-300 bg-red-50" : "border-gray-300"
+                    }`}
                   maxLength={1000}
                 />
                 {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
@@ -166,16 +168,33 @@ const CreateFundraiser = () => {
                       key={goal}
                       type="button"
                       onClick={() => setForm({ ...form, goal_amount: goal.toString() })}
-                      className={`p-2 text-sm rounded-lg border-2 transition-all duration-200 ${
-                        form.goal_amount === goal.toString()
-                          ? "border-pink-500 bg-pink-50 text-pink-700"
-                          : "border-gray-200 hover:border-pink-300 hover:bg-pink-50"
-                      }`}
+                      className={`p-2 text-sm rounded-lg border-2 transition-all duration-200 ${form.goal_amount === goal.toString()
+                        ? "border-pink-500 bg-pink-50 text-pink-700"
+                        : "border-gray-200 hover:border-pink-300 hover:bg-pink-50"
+                        }`}
                     >
                       ${goal.toLocaleString()}
                     </button>
                   ))}
                 </div>
+
+                {/* Image Upload Field */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Fundraiser Image (optional)
+                  </label>
+                  <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
+                    className="w-full px-4 py-2 border rounded-xl border-gray-300"
+                  />
+                  {form.image && (
+                    <p className="mt-1 text-xs text-gray-500">Selected: {form.image.name}</p>
+                  )}
+                </div>
+
 
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">
@@ -187,9 +206,8 @@ const CreateFundraiser = () => {
                     placeholder="0.00"
                     value={form.goal_amount}
                     onChange={handleChange}
-                    className={`w-full pl-8 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 ${
-                      errors.goal_amount ? "border-red-300 bg-red-50" : "border-gray-300"
-                    }`}
+                    className={`w-full pl-8 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 ${errors.goal_amount ? "border-red-300 bg-red-50" : "border-gray-300"
+                      }`}
                     min="100"
                     step="1"
                   />
