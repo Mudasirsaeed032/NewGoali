@@ -35,6 +35,7 @@ const FundraiserDetail = () => {
     const fetchFundraiser = async () => {
       try {
         const { data, error } = await supabase.from("fundraisers").select("*").eq("id", id).single()
+        
         if (error) throw error
         setFundraiser(data)
       } catch (err) {

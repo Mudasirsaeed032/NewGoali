@@ -83,6 +83,7 @@ const AdminDashboard = () => {
           .single()
 
         setIsStripeConnected(!!team?.stripe_connect_id)
+        console.log(team?.stripe_connect_id);
         setMetrics(metricsData)
         setUsers(usersData.users)
         setInvites(invitesData.invites)
