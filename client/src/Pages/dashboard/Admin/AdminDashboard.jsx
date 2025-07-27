@@ -27,6 +27,7 @@ import InviteTable from "./InviteTable.jsx"
 import AdminEventList from "./AdminEventList.jsx"
 import AdminFundraiserList from "./AdminFundraiserList.jsx"
 import AdminPaymentsTable from "./AdminPaymentstTable.jsx"
+import DuesGenerator from "../../Athletes/DuesGenerator.jsx"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -258,6 +259,7 @@ const AdminDashboard = () => {
                 <span>Connect Stripe</span>
               </motion.button>
             )}
+
             <Link
               to="/events/create"
               className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-lg font-header flex items-center space-x-2 hover:shadow-lg transition-all duration-200 no-underline"
@@ -414,6 +416,11 @@ const AdminDashboard = () => {
                     ))}
                   </div>
                 )}
+                <div className="bg-gray rounded-2xl p-6 shadow-lg border border-gray-100">
+                  <h3 className="text-lg font-header text-black-900 mb-4">Generate Monthly Dues</h3>
+                  <DuesGenerator teamId={currentUser?.team_id} />
+                </div>
+
 
                 {/* Recent Activity */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">

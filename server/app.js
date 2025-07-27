@@ -17,6 +17,7 @@ const stripeRoutes = require('./routes/stripe');
 const coachRoutes = require('./routes/coach');
 const ticketRoutes = require('./routes/ticket');
 const masterAdminRoutes = require('./routes/masterAdminRoutes');
+const duesRoutes = require('./routes/dues')
 
 const app = express()
 
@@ -36,6 +37,8 @@ app.use('/api/stripe', stripeRoutes);
 app.use('/api/coach', coachRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/master', masterAdminRoutes);
+app.use('/api/dues', duesRoutes)
+
 
 
 module.exports = app
