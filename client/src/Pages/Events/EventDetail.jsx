@@ -10,6 +10,7 @@ const EventDetail = () => {
   const [ticketsSold, setTicketsSold] = useState(0)
   const [copySuccess, setCopySuccess] = useState(false)
 
+
   useEffect(() => {
     const fetchEvent = async () => {
       const { data, error } = await supabase.from("events").select("*").eq("id", id).single()
@@ -122,7 +123,7 @@ const EventDetail = () => {
   }
 
   const eventDate = new Date(event.date)
-  const isUpcoming = eventDate > new Date()
+  const isUpcoming = event?.is_season_ticket || eventDate > new Date();
   const formattedDate = eventDate.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -238,8 +239,12 @@ const EventDetail = () => {
                         </svg>
                       </div>
                       <div>
-                        <p className="text-white font-semibold">{formattedDate}</p>
-                        <p className="text-white/60 text-sm">{formattedTime}</p>
+                        <p className="text-white font-semibold">
+                          {event.is_season_ticket ? "Season Ticket" : formattedDate}
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          {event.is_season_ticket ? "Multiple Games" : formattedTime}
+                        </p>
                       </div>
                     </div>
                     {/* Location */}
@@ -262,22 +267,28 @@ const EventDetail = () => {
                       </div>
                       <div>
                         <p className="text-white font-semibold">Location</p>
-                        <p className="text-white/60 text-sm">{event.location}</p>
+                        <p className="text-white/60 text-sm">
+                          {event.is_season_ticket ? "Multiple Venues" : event.location}
+                        </p>
+
                       </div>
                     </div>
-                    <div className="text-center mb-4">
-                      <p className="text-white/80 text-sm mb-1">Tickets Sold</p>
-                      <div className="text-white font-bold text-lg">
-                        {ticketsSold} / {event.max_tickets}
+                    {!event.is_season_ticket && (
+                      <div className="text-center mb-4">
+                        <p className="text-white/80 text-sm mb-1">Tickets Sold</p>
+                        <div className="text-white font-bold text-lg">
+                          {ticketsSold} / {event.max_tickets}
+                        </div>
+                        {/* Optional Progress Bar */}
+                        <div className="w-full bg-white/10 rounded-full h-2 mt-2">
+                          <div
+                            className="bg-green-400 h-2 rounded-full"
+                            style={{ width: `${(ticketsSold / event.max_tickets) * 100}%` }}
+                          ></div>
+                        </div>
                       </div>
-                      {/* Optional Progress Bar */}
-                      <div className="w-full bg-white/10 rounded-full h-2 mt-2">
-                        <div
-                          className="bg-green-400 h-2 rounded-full"
-                          style={{ width: `${(ticketsSold / event.max_tickets) * 100}%` }}
-                        ></div>
-                      </div>
-                    </div>
+                    )}
+
                   </div>
                 </div>
                 {/* Right Column - Ticket Purchase */}
@@ -323,7 +334,7 @@ const EventDetail = () => {
                       </div>
                     </div>
                     {isUpcoming ? (
-                      ticketsSold < event.max_tickets ? (
+                      event.is_season_ticket || ticketsSold < event.max_tickets ? (
                         <button
                           onClick={handleBuyTicket}
                           className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 flex items-center justify-center space-x-2"
@@ -348,6 +359,7 @@ const EventDetail = () => {
                         Event Has Ended
                       </div>
                     )}
+
                     <div className="mt-4 text-center">
                       <p className="text-white/50 text-xs">Powered by Stripe • Secure checkout</p>
                     </div>
@@ -407,8 +419,8 @@ const EventDetail = () => {
                   <span className="text-white/70">Status</span>
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium ${isUpcoming
-                        ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                        : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
+                      ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                      : "bg-gray-500/20 text-gray-400 border border-gray-500/30"
                       }`}
                   >
                     {isUpcoming ? "Active" : "Ended"}

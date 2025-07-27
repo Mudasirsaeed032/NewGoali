@@ -38,7 +38,6 @@ app.use('/api/coach', coachRoutes);
 app.use('/api/tickets', ticketRoutes);
 app.use('/api/master', masterAdminRoutes);
 app.use('/api/dues', duesRoutes)
-
-
+app.use('/api/season-tickets', require('./routes/seasonRoutes'));
 
 module.exports = app

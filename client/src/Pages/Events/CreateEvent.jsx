@@ -12,8 +12,11 @@ const CreateEvent = () => {
     location: "",
     price: "",
     max_tickets: "",
-    image: null
-  })
+    image: null,
+    is_season_ticket: false,
+    total_games: "",
+    total_price: ""
+  });
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
@@ -30,25 +33,36 @@ const CreateEvent = () => {
   }, [])
 
   const validateForm = () => {
-    const newErrors = {}
-    if (!form.title.trim()) newErrors.title = "Event title is required"
-    if (!form.date) newErrors.date = "Event date is required"
-    if (!form.location.trim()) newErrors.location = "Event location is required"
-    if (form.price && isNaN(form.price)) newErrors.price = "Price must be a valid number"
-    if (!form.max_tickets || isNaN(form.max_tickets)) newErrors.max_tickets = "Max tickets must be a valid number";
+    const newErrors = {};
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    // Always validate title
+    if (!form.title.trim()) newErrors.title = "Event title is required";
+
+    // If it's NOT a season ticket, validate normal event fields
+    if (!form.is_season_ticket) {
+      if (!form.date) newErrors.date = "Event date is required";
+      if (!form.location.trim()) newErrors.location = "Event location is required";
+      if (form.price && isNaN(form.price)) newErrors.price = "Price must be a valid number";
+      if (!form.max_tickets || isNaN(form.max_tickets)) newErrors.max_tickets = "Max tickets must be a valid number";
+    }
+
+    // If it's a season ticket, validate season-specific fields
+    if (form.is_season_ticket) {
+      if (!form.total_games || isNaN(form.total_games)) newErrors.total_games = "Total games must be a number";
+      if (!form.total_price || isNaN(form.total_price)) newErrors.total_price = "Total price must be a number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setForm({ ...form, [name]: value })
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" })
-    }
-  }
+    const { name, value, type, checked } = e.target;
+    setForm({ ...form, [name]: type === 'checkbox' ? checked : value });
+    if (errors[name]) setErrors({ ...errors, [name]: "" });
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -66,6 +80,10 @@ const CreateEvent = () => {
       formData.append("price", parseFloat(form.price || 0));
       formData.append("max_tickets", parseInt(form.max_tickets || 0));
       formData.append("created_by", user.id);
+      formData.append("is_season_ticket", form.is_season_ticket);
+      formData.append("total_games", form.total_games || 0);
+      formData.append("total_price", form.total_price || 0);
+
 
       if (form.image) {
         formData.append("image", form.image);
@@ -173,60 +191,64 @@ const CreateEvent = () => {
               </div>
 
               {/* Date and Location Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="flex items-center text-white font-medium">
-                    <svg className="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Event Date *
-                  </label>
-                  <input
-                    type="date"
-                    name="date"
-                    value={form.date}
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-white/10 border ${errors.date ? "border-red-400" : "border-white/20"} rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
-                    required
-                  />
-                  {errors.date && <p className="text-red-400 text-sm">{errors.date}</p>}
-                </div>
+              {/* Date and Location (hidden for season tickets) */}
+              {!form.is_season_ticket && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="flex items-center text-white font-medium">
+                      <svg className="w-5 h-5 mr-2 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Event Date *
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={form.date}
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 bg-white/10 border ${errors.date ? "border-red-400" : "border-white/20"} rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
+                      required
+                    />
+                    {errors.date && <p className="text-red-400 text-sm">{errors.date}</p>}
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="flex items-center text-white font-medium">
-                    <svg className="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                    Location *
-                  </label>
-                  <input
-                    type="text"
-                    name="location"
-                    value={form.location}
-                    placeholder="Event venue or address"
-                    onChange={handleChange}
-                    className={`w-full px-4 py-3 bg-white/10 border ${errors.location ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
-                    required
-                  />
-                  {errors.location && <p className="text-red-400 text-sm">{errors.location}</p>}
+                  <div className="space-y-2">
+                    <label className="flex items-center text-white font-medium">
+                      <svg className="w-5 h-5 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      Location *
+                    </label>
+                    <input
+                      type="text"
+                      name="location"
+                      value={form.location}
+                      placeholder="Event venue or address"
+                      onChange={handleChange}
+                      className={`w-full px-4 py-3 bg-white/10 border ${errors.location ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
+                      required
+                    />
+                    {errors.location && <p className="text-red-400 text-sm">{errors.location}</p>}
+                  </div>
                 </div>
-              </div>
+              )}
+
 
               {/* Image Upload Field */}
               <div>
@@ -246,54 +268,97 @@ const CreateEvent = () => {
               </div>
 
 
-              {/* Pricing Section */}
-              <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                <h3 className="text-white font-semibold mb-4 flex items-center">
-                  <svg className="w-5 h-5 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                    />
-                  </svg>
-                  Event Pricing & Goals
-                </h3>
+              {!form.is_season_ticket && (
+                <>
+                  {/* Pricing Section */}
+                  <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
+                    <h3 className="text-white font-semibold mb-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
+                        />
+                      </svg>
+                      Event Pricing & Goals
+                    </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-gray-300 text-sm">Ticket Price ($)</label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={form.price}
-                      placeholder="0.00"
-                      onChange={handleChange}
-                      min="0"
-                      step="0.01"
-                      className={`w-full px-4 py-3 bg-white/10 border ${errors.price ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
-                    />
-                    {errors.price && <p className="text-red-400 text-sm">{errors.price}</p>}
-                    <p className="text-gray-400 text-xs">Leave empty for free events</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-gray-300 text-sm">Ticket Price ($)</label>
+                        <input
+                          type="number"
+                          name="price"
+                          value={form.price}
+                          placeholder="0.00"
+                          onChange={handleChange}
+                          min="0"
+                          step="0.01"
+                          className={`w-full px-4 py-3 bg-white/10 border ${errors.price ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
+                        />
+                        {errors.price && <p className="text-red-400 text-sm">{errors.price}</p>}
+                        <p className="text-gray-400 text-xs">Leave empty for free events</p>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-gray-300 text-sm">Max Tickets</label>
+                        <input
+                          type="number"
+                          name="max_tickets"
+                          value={form.max_tickets}
+                          placeholder="e.g. 50"
+                          onChange={handleChange}
+                          min="1"
+                          step="1"
+                          className={`w-full px-4 py-3 bg-white/10 border ${errors.max_tickets ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
+                        />
+                        {errors.max_tickets && <p className="text-red-400 text-sm">{errors.max_tickets}</p>}
+                        <p className="text-gray-400 text-xs">Total number of tickets you want to sell</p>
+                      </div>
+                    </div>
                   </div>
+                </>
+              )}
 
-                  <div className="space-y-2">
-                    <label className="text-gray-300 text-sm">Max Tickets</label>
-                    <input
-                      type="number"
-                      name="max_tickets"
-                      value={form.max_tickets}
-                      placeholder="e.g. 50"
-                      onChange={handleChange}
-                      min="1"
-                      step="1"
-                      className={`w-full px-4 py-3 bg-white/10 border ${errors.max_tickets ? "border-red-400" : "border-white/20"} rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200 backdrop-blur-sm`}
-                    />
-                    {errors.max_tickets && <p className="text-red-400 text-sm">{errors.max_tickets}</p>}
-                    <p className="text-gray-400 text-xs">Total number of tickets you want to sell</p>
+              <div className="space-y-4">
+                <label className="flex items-center text-white font-medium">
+                  <input
+                    type="checkbox"
+                    name="is_season_ticket"
+                    checked={form.is_season_ticket}
+                    onChange={handleChange}
+                    className="mr-2"
+                  />
+                  This is a Season Ticket
+                </label>
+
+                {form.is_season_ticket && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-white text-sm">Total Games</label>
+                      <input
+                        type="number"
+                        name="total_games"
+                        value={form.total_games}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white"
+                      />
+                      {errors.total_games && <p className="text-red-400 text-sm">{errors.total_games}</p>}
+                    </div>
+                    <div>
+                      <label className="text-white text-sm">Total Season Price</label>
+                      <input
+                        type="number"
+                        name="total_price"
+                        value={form.total_price}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white"
+                      />
+                      {errors.total_price && <p className="text-red-400 text-sm">{errors.total_price}</p>}
+                    </div>
                   </div>
-
-                </div>
+                )}
               </div>
 
               {/* Submit Button */}

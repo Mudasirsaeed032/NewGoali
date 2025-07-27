@@ -4,12 +4,36 @@ const fs = require('fs')
 
 // Create Event (Admin or Coach)
 exports.createEvent = async (req, res) => {
-  const { title, description, location, date, price, max_tickets, created_by } = req.body
+  const {
+    title, description, location, date, price, max_tickets,
+    created_by, is_season_ticket, total_games, total_price
+  } = req.body;
 
 
-  if (!title || !location || !date || !created_by || !max_tickets) {
-    return res.status(400).json({ error: 'Missing required fields' })
+
+  if (!title || !created_by) {
+    return res.status(400).json({ error: 'Missing required fields: title or creator' });
   }
+
+  if (is_season_ticket === 'true') {
+    if (!total_games || isNaN(total_games)) {
+      return res.status(400).json({ error: 'Total games must be a number for season tickets' });
+    }
+    if (!total_price || isNaN(total_price)) {
+      return res.status(400).json({ error: 'Total price must be a number for season tickets' });
+    }
+  } else {
+    if (!date) {
+      return res.status(400).json({ error: 'Event date is required' });
+    }
+    if (!location) {
+      return res.status(400).json({ error: 'Event location is required' });
+    }
+    if (!max_tickets || isNaN(max_tickets)) {
+      return res.status(400).json({ error: 'Max tickets must be a valid number' });
+    }
+  }
+
 
   try {
     // Get the user to fetch team & role
@@ -39,14 +63,22 @@ exports.createEvent = async (req, res) => {
       .insert({
         title,
         description,
-        location,
-        date,
-        price,
-        max_tickets,
+        location: location === "" ? null : location,
+        date: is_season_ticket === 'true'
+          ? '2099-01-01'
+          : (date === "" ? null : date),
+        price: parseFloat(
+          is_season_ticket === 'true'
+            ? total_price || '0'
+            : price || '0'
+        ),
+        max_tickets: max_tickets ? parseInt(max_tickets) : 0,
         created_by,
         team_id,
         status,
-        image_url
+        image_url,
+        is_season_ticket: is_season_ticket === 'true',
+        total_games: total_games ? parseInt(total_games) : null,
       })
       .select()
       .single()
@@ -138,3 +170,4 @@ exports.getAllEvents = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch all events', detail: err.message })
   }
 }
+
