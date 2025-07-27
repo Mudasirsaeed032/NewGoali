@@ -15,22 +15,21 @@ exports.stripeWebhook = async (req, res) => {
   }
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object
-    const metadata = session.metadata || {}
+    const session = event.data.object;
+    const metadata = session.metadata || {};
+    console.log("Stripe metadata received:", metadata);
 
-    // ✅ Fetch team_id from user metadata
     const { data: user, error: userErr } = await supabase
       .from('users')
       .select('team_id')
       .eq('id', metadata.user_id)
-      .single()
+      .single();
 
     if (userErr || !user) {
-      console.error('Failed to fetch user/team:', userErr)
-      return res.status(500).json({ error: 'Failed to get team_id' })
+      console.error('Failed to fetch user/team:', userErr);
+      return res.status(500).json({ error: 'Failed to get team_id' });
     }
 
-    // ✅ Build payment object
     const newPayment = {
       user_id: metadata.user_id,
       amount: session.amount_total / 100,
@@ -39,19 +38,32 @@ exports.stripeWebhook = async (req, res) => {
       fundraiser_id: metadata.fundraiser_id || null,
       event_id: metadata.event_id || null,
       team_id: user.team_id,
-      type: metadata.event_id ? 'ticket' : 'donation'  // ✅ matches allowed values
+      type: metadata.event_id
+        ? 'ticket'
+        : metadata.fundraiser_id
+          ? 'donation'
+          : 'dues'
+    };
+
+    // ✅ Update dues once only
+    if (metadata.due_id) {
+      await supabase
+        .from('dues')
+        .update({
+          paid: true,
+          paid_by: metadata.user_id,
+          paid_at: new Date().toISOString()
+        })
+        .eq('id', metadata.due_id);
     }
 
-
-
-    // ✅ Insert into payments
     const { error: insertError } = await supabase
       .from('payments')
-      .insert(newPayment)
+      .insert(newPayment);
 
     if (insertError) {
-      console.error('Failed to store payment:', insertError)
-      return res.status(500).json({ error: 'Failed to store payment' })
+      console.error('Failed to store payment:', insertError);
+      return res.status(500).json({ error: 'Failed to store payment' });
     }
 
     // ✅ Update fundraiser total
@@ -94,7 +106,7 @@ exports.stripeWebhook = async (req, res) => {
 }
 
 exports.createCheckoutSession = async (req, res) => {
-  const { user_id, amount, fundraiser_id, event_id } = req.body;
+  const { user_id, amount, fundraiser_id, event_id, due_id } = req.body;
 
   try {
     // ✅ Get user's team_id
@@ -141,7 +153,11 @@ exports.createCheckoutSession = async (req, res) => {
             currency: 'usd',
             unit_amount: amount * 100,
             product_data: {
-              name: fundraiser_id ? 'Fundraiser Donation' : 'Event Ticket'
+              name: fundraiser_id
+                ? 'Fundraiser Donation'
+                : event_id
+                  ? 'Event Ticket'
+                  : 'Monthly Dues'
             }
           },
           quantity: 1
@@ -155,11 +171,12 @@ exports.createCheckoutSession = async (req, res) => {
       },
       metadata: {
         user_id,
-        fundraiser_id: fundraiser_id || '',
-        event_id: event_id || ''
+        ...(fundraiser_id && { fundraiser_id }),
+        ...(event_id && { event_id }),
+        ...(due_id && { due_id })
       },
-      success_url: `${process.env.FRONTEND_URL}/success`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`
+      success_url: `${process.env.FRONTEND_URL}`,
+      cancel_url: `${process.env.FRONTEND_URL}`
     });
 
     return res.json({ url: session.url });

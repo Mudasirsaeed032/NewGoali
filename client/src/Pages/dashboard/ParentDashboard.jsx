@@ -10,6 +10,8 @@ const ParentDashboard = () => {
   const [recentPayments, setRecentPayments] = useState([])
   const [upcomingEvents, setUpcomingEvents] = useState([])
   const [loading, setLoading] = useState(true)
+  const [unpaidDues, setUnpaidDues] = useState([])
+
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -35,7 +37,12 @@ const ParentDashboard = () => {
         if (athletes && athletes.length > 0) {
           setAthleteChild(athletes[0])
         }
+        // ✅ Fetch unpaid dues for that athlete
+        const duesRes = await fetch(`http://localhost:5000/api/dues/by-user/${athletes[0].id}`)
+        const duesData = await duesRes.json()
+        setUnpaidDues(duesData.dues || [])
       }
+
 
       // Mock recent payments data
       setRecentPayments([
@@ -54,6 +61,31 @@ const ParentDashboard = () => {
 
     fetchDashboard()
   }, [])
+
+  const handlePayDues = async (due) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/payments/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,        // parent paying
+          due_id: due.id,
+          amount: due.amount
+        })
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert("Failed to initiate payment.")
+      }
+    } catch (err) {
+      console.error("Parent Payment Error:", err)
+      alert("Error initiating payment.")
+    }
+  }
+
 
   if (loading) {
     return (
@@ -152,6 +184,44 @@ const ParentDashboard = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {unpaidDues.length > 0 && (
+            <div className="bg-white/10 p-6 mt-10 rounded-xl border border-white/20">
+              <h2 className="text-white text-xl font-semibold mb-4">
+                Dues for {athleteChild?.full_name}
+              </h2>
+              <div className="space-y-3">
+                {unpaidDues.map((due) => (
+                  <div
+                    key={due.id}
+                    className="flex justify-between items-center bg-white/5 p-4 rounded-lg border border-white/10"
+                  >
+                    <div>
+                      <p className="text-white font-semibold">Month: {due.due_month}</p>
+                      <p className="text-purple-300 text-sm">Amount: ${due.amount}</p>
+                      {due.paid && (
+                        <p className="text-green-400 text-xs mt-1">Paid on {new Date(due.paid_at).toLocaleDateString()}</p>
+                      )}
+                    </div>
+
+                    {due.paid ? (
+                      <span className="bg-green-600 text-white text-xs px-3 py-1 rounded-full">
+                        ✅ Paid
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handlePayDues(due)}
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                      >
+                        Pay Now
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+
           {/* Recent Payments */}
           <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
             <div className="flex items-center justify-between mb-6">

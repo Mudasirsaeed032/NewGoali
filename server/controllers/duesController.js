@@ -1,6 +1,9 @@
 const supabase = require('../services/supabase')
 const express = require('express');
 const app = express();
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+
+
 
 app.use(express.json());
 
@@ -120,42 +123,40 @@ exports.getTeamDues = async (req, res) => {
 };
 
 exports.payDue = async (req, res) => {
-  const { due_id, user_id, amount, method } = req.body
+  const { due_id } = req.params
 
-  if (!due_id || !user_id || !amount || !method) {
-    return res.status(400).json({ error: "Missing required fields" })
-  }
-
-  // 1. Mark the due as paid
-  const { error: dueError } = await supabase
+  const { data: due, error } = await supabase
     .from('dues')
-    .update({
-      paid: true,
-      paid_by: user_id,
-      paid_at: new Date().toISOString(),
-    })
+    .select(`
+      id, amount, athlete_user_id,
+      athlete:users!dues_athlete_user_id_fkey (email)
+    `)
     .eq('id', due_id)
+    .single()
 
-  if (dueError) {
-    console.error("[Due Payment Error]", dueError.message)
-    return res.status(500).json({ error: "Failed to update due" })
-  }
+  if (error || !due) return res.status(404).json({ error: 'Due not found' })
 
-  // 2. Insert into payments table
-  const { error: paymentError } = await supabase.from('payments').insert([
-    {
-      user_id,
-      amount,
-      method,
-      status: 'paid',
-      dues_id: due_id, // optional, if you add a `dues_id` FK
-    },
-  ])
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    customer_email: due.athlete.email,
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: `Monthly Dues - ${due_id}`,
+        },
+        unit_amount: Math.round(due.amount * 100), // in cents
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    success_url: `${process.env.CLIENT_URL}/dues/success`,
+    cancel_url: `${process.env.CLIENT_URL}/dues/cancel`,
+    metadata: {
+      due_id: due.id,
+      athlete_user_id: due.athlete_user_id
+    }
+  })
 
-  if (paymentError) {
-    console.error("[Payment Insert Error]", paymentError.message)
-    return res.status(500).json({ error: "Failed to log payment" })
-  }
-
-  res.json({ message: "Due paid successfully" })
+  res.json({ url: session.url })
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../../../supabaseClient"
 import { Link } from "react-router-dom"
+import AthleteDues from "./AthleteDues"
 
 const AthleteDashboard = () => {
   const [user, setUser] = useState(null)
@@ -10,7 +11,7 @@ const AthleteDashboard = () => {
   const [tickets, setTickets] = useState([])
   const [inviteLink, setInviteLink] = useState("")
   const [loading, setLoading] = useState(true)
-
+  const [dues, setDues] = useState([])
   useEffect(() => {
     const fetchDashboard = async () => {
       const {
@@ -19,7 +20,10 @@ const AthleteDashboard = () => {
       if (!user) return
 
       setUser(user)
-
+      // Fetch unpaid dues
+      const duesRes = await fetch(`http://localhost:5000/api/dues/by-user/${user.id}`)
+      const duesData = await duesRes.json()
+      setDues((duesData.dues || []).filter(d => !d.paid))
       // ✅ Get team_id for invite
       const { data: userRecord } = await supabase.from("users").select("team_id").eq("id", user.id).single()
 
@@ -43,6 +47,31 @@ const AthleteDashboard = () => {
     navigator.clipboard.writeText(inviteLink)
     alert("Parent invite link copied!")
   }
+
+  const handlePayDues = async (due) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/payments/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user.id,
+          amount: due.amount,
+          due_id: due.id
+        })
+      })
+
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        alert("Failed to initiate payment.")
+      }
+    } catch (err) {
+      console.error("Payment error:", err)
+      alert("Error initiating payment.")
+    }
+  }
+
 
   if (loading) {
     return (
@@ -148,15 +177,40 @@ const AthleteDashboard = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Monthly Dues Section */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mt-12">
-            <div className="flex items-center mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
-                💳
+          {/* Unpaid Dues Section */}
+          <div className="mt-12">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+              <div className="flex items-center mb-8">
+                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-yellow-500 rounded-xl flex items-center justify-center mr-4">
+                  💳
+                </div>
+                <h2 className="text-2xl font-bold text-white">Your Unpaid Dues</h2>
               </div>
-              <h2 className="text-2xl font-bold text-white">Monthly Dues</h2>
+
+              {dues.length === 0 ? (
+                <p className="text-purple-200">You have no unpaid dues. Great job!</p>
+              ) : (
+                <div className="space-y-4">
+                  {dues.map((due) => (
+                    <div
+                      key={due.id}
+                      className="bg-white/5 rounded-lg p-4 flex items-center justify-between border border-white/10"
+                    >
+                      <div>
+                        <p className="text-white font-semibold">Month: {due.due_month}</p>
+                        <p className="text-purple-300 text-sm">Amount: ${due.amount}</p>
+                      </div>
+                      <button
+                        onClick={() => handlePayDues(due)}
+                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-5 py-2 rounded-lg text-sm font-medium shadow-md"
+                      >
+                        Pay Now
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <AthleteDues userId={user.id} />
           </div>
 
 
