@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { supabase } from "../../supabaseClient"
+import { supabase } from "../../../supabaseClient"
 import { Link } from "react-router-dom"
 
 const AthleteDashboard = () => {
@@ -148,7 +148,17 @@ const AthleteDashboard = () => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
+          {/* Monthly Dues Section */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 mt-12">
+            <div className="flex items-center mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center mr-4">
+                💳
+              </div>
+              <h2 className="text-2xl font-bold text-white">Monthly Dues</h2>
+            </div>
+            <AthleteDues userId={user.id} />
+          </div>
+
 
           {/* Parent Invite Section */}
           <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">

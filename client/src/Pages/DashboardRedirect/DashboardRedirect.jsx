@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import AdminDashboard from '../dashboard/Admin/AdminDashboard'
 import CoachDashboard from '../dashboard/Coach/CoachDashboard'
 import ParentDashboard from '../dashboard/ParentDashboard'
-import AthleteDashboard from '../dashboard/AthleteDashboard'
+import AthleteDashboard from '../dashboard/Athlete/AthleteDashboard'
 import MasterAdminDashboard from '../dashboard/MasterAdmin/MasterAdminDashboard'
 
 const DashboardRedirect = () => {

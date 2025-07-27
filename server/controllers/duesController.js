@@ -118,3 +118,44 @@ exports.getTeamDues = async (req, res) => {
 
   res.json({ dues: data });
 };
+
+exports.payDue = async (req, res) => {
+  const { due_id, user_id, amount, method } = req.body
+
+  if (!due_id || !user_id || !amount || !method) {
+    return res.status(400).json({ error: "Missing required fields" })
+  }
+
+  // 1. Mark the due as paid
+  const { error: dueError } = await supabase
+    .from('dues')
+    .update({
+      paid: true,
+      paid_by: user_id,
+      paid_at: new Date().toISOString(),
+    })
+    .eq('id', due_id)
+
+  if (dueError) {
+    console.error("[Due Payment Error]", dueError.message)
+    return res.status(500).json({ error: "Failed to update due" })
+  }
+
+  // 2. Insert into payments table
+  const { error: paymentError } = await supabase.from('payments').insert([
+    {
+      user_id,
+      amount,
+      method,
+      status: 'paid',
+      dues_id: due_id, // optional, if you add a `dues_id` FK
+    },
+  ])
+
+  if (paymentError) {
+    console.error("[Payment Insert Error]", paymentError.message)
+    return res.status(500).json({ error: "Failed to log payment" })
+  }
+
+  res.json({ message: "Due paid successfully" })
+}

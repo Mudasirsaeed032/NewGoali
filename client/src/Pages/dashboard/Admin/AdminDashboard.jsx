@@ -418,7 +418,6 @@ const AdminDashboard = () => {
                   </div>
                 )}
 
-
                 {/* Recent Activity */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                   <h3 className="text-lg font-header text-gray-900 mb-4">Recent Activity</h3>
