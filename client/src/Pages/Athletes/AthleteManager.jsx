@@ -8,13 +8,14 @@ const AthleteManager = () => {
   const [userId, setUserId] = useState(null)
   const [athletes, setAthletes] = useState([])
   const [athleteUsers, setAthleteUsers] = useState([])
-  const [form, setForm] = useState({ full_name: "", position: "", age: "", jersey_number: "", user_id: null })
+  const [form, setForm] = useState({ full_name: "", position: "", age: "", jersey_number: "", user_id: null, parent_id: null })
   const [editingId, setEditingId] = useState(null)
-
-
+  const [availableParents, setAvailableParents] = useState([])
+  const [parentUsers, setParentUsers] = useState([])
 
   useEffect(() => {
     const fetchInitial = async () => {
+
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -22,12 +23,29 @@ const AthleteManager = () => {
       const { data: userData } = await supabase.from("users").select("team_id").eq("id", user.id).single()
       const team_id = userData.team_id
       setTeamId(team_id)
+
       const { data: userList } = await supabase
         .from("users")
         .select("id, full_name, email")
         .eq("team_id", team_id)
         .eq("role", "athlete")
       setAthleteUsers(userList)
+
+      const { data: parentUsers } = await supabase
+        .from("users")
+        .select("id, full_name, email")
+        .eq("team_id", team_id)
+        .eq("role", "parent")
+      setAvailableParents(parentUsers)
+
+      const { data: parents } = await supabase
+        .from("users")
+        .select("id, full_name")
+        .eq("team_id", team_id)
+        .eq("role", "parent")
+
+      setParentUsers(parents || [])
+
       const res = await fetch(`http://localhost:5000/api/athletes/by-team/${team_id}`)
       const { athletes } = await res.json()
       setAthletes(athletes)
@@ -40,7 +58,7 @@ const AthleteManager = () => {
   }
 
   const handleCreate = (user_id, full_name) => {
-    setForm({ full_name, position: "", age: "", jersey_number: "", user_id })
+    setForm({ full_name, position: "", age: "", jersey_number: "", user_id, parent_id: "" })
   }
 
 
@@ -69,9 +87,13 @@ const AthleteManager = () => {
       jersey_number: Number(form.jersey_number),
       team_id: teamId,
       created_by: userId,
-      user_id: form.user_id, // ✅ This is the fix
+      user_id: form.user_id
     }
 
+    // If this is a new athlete being created AND a parent is selected
+    if (!editingId && form.parent_id) {
+      payload.parent_id = form.parent_id
+    }
     if (editingId) {
       await fetch(`http://localhost:5000/api/athletes/${editingId}`, {
         method: "PUT",
@@ -85,7 +107,7 @@ const AthleteManager = () => {
         body: JSON.stringify(payload),
       })
     }
-    setForm({ full_name: "", position: "", age: "", jersey_number: "", user_id: null })
+    setForm({ full_name: "", position: "", age: "", jersey_number: "", user_id: null, parent_id: "" })
     setEditingId(null)
     const res = await fetch(`http://localhost:5000/api/athletes/by-team/${teamId}`)
     const { athletes } = await res.json()
@@ -286,6 +308,22 @@ const AthleteManager = () => {
                   placeholder="Enter jersey number"
                   className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300">Assign Parent</label>
+                <select
+                  name="parent_id"
+                  value={form.parent_id || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none"
+                >
+                  <option value="">Select parent</option>
+                  {parentUsers.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.full_name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="md:col-span-2">

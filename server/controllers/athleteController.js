@@ -1,20 +1,47 @@
 const supabase = require('../services/supabase')
 
 exports.createAthlete = async (req, res) => {
-  const { full_name, position, age, jersey_number, stats, team_id, created_by, user_id } = req.body
+  console.log("Create Athlete Payload:", req.body)
+
+  const { full_name, position, age, jersey_number, stats, team_id, created_by, user_id, parent_id } = req.body;
 
   if (!full_name || !team_id || !created_by) {
-    return res.status(400).json({ error: 'Missing required fields' })
+    return res.status(400).json({ error: 'Missing required fields' });
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('athletes')
     .insert([{ full_name, position, age, jersey_number, stats, team_id, created_by, user_id }])
+    .select();
 
-  if (error) return res.status(500).json({ error: 'Failed to create athlete', detail: error.message })
+  if (error) return res.status(500).json({ error: 'Failed to create athlete', detail: error.message });
 
-  res.json({ message: 'Athlete created successfully' })
+  // Insert parent mapping
+  if (parent_id) {
+  console.log("[Parent Mapping] Attempting to insert:", {
+    athlete_user_id: user_id,
+    parent_user_id: parent_id,
+  });
+
+  const { error: parentError } = await supabase
+    .from('athlete_parents')
+    .insert([{ athlete_user_id: user_id, parent_user_id: parent_id }]);
+
+  if (parentError) {
+    console.error("[Parent Mapping] Failed to insert:", parentError);
+    return res.status(500).json({
+      error: 'Athlete created, but failed to assign parent.',
+      detail: parentError.message,
+    });
+  }
+
+  console.log("[Parent Mapping] Inserted successfully.");
 }
+
+
+  res.json({ message: 'Athlete created successfully' });
+}
+
 
 exports.getAthletes = async (req, res) => {
   const { team_id } = req.params
