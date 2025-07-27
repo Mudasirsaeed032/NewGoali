@@ -28,6 +28,7 @@ import AdminEventList from "./AdminEventList.jsx"
 import AdminFundraiserList from "./AdminFundraiserList.jsx"
 import AdminPaymentsTable from "./AdminPaymentstTable.jsx"
 import DuesGenerator from "../../Athletes/DuesGenerator.jsx"
+import AdminDuesList from "./AdminDuesList.jsx"
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
@@ -148,7 +149,7 @@ const AdminDashboard = () => {
     { id: "events", label: "Events", icon: Calendar, description: "Manage fundraising events and activities" },
     { id: "fundraisers", label: "Fundraisers", icon: Heart, description: "Track fundraising campaigns" },
     { id: "payments", label: "Payments", icon: CreditCard, description: "Monitor payment transactions" },
-    { id: "activity", label: "Activity", icon: TrendingUp, description: "View recent activity logs" },
+    { id: "dues", label: "Dues", icon: TrendingUp, description: "System configuration and preferences" },
     { id: "settings", label: "Settings", icon: Settings, description: "System configuration and preferences" },
   ]
 
@@ -416,10 +417,6 @@ const AdminDashboard = () => {
                     ))}
                   </div>
                 )}
-                <div className="bg-gray rounded-2xl p-6 shadow-lg border border-gray-100">
-                  <h3 className="text-lg font-header text-black-900 mb-4">Generate Monthly Dues</h3>
-                  <DuesGenerator teamId={currentUser?.team_id} />
-                </div>
 
 
                 {/* Recent Activity */}
@@ -611,6 +608,33 @@ const AdminDashboard = () => {
                       ))
                     )}
                   </div>
+                </div>
+              </motion.div>
+            )}
+            {/* Dues Tab */}
+            {activeTab === "dues" && (
+              <motion.div
+                key="dues"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                <div>
+                  <h2 className="text-2xl font-title text-gray-900 mb-2">Monthly Dues Management</h2>
+                  <p className="text-gray-600 font-body">
+                    Generate and track dues owed by athletes and their parents
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                  <h3 className="text-lg font-header text-gray-900 mb-4">Generate New Monthly Dues</h3>
+                  <DuesGenerator teamId={currentUser?.team_id} />
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                  <h3 className="text-lg font-header text-gray-900 mb-4">Dues List</h3>
+                  <AdminDuesList teamId={currentUser?.team_id} />
                 </div>
               </motion.div>
             )}
